@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html class="dark" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SANCTUM AI - Structural Intelligence System</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
+    <script src="https://cdn.plot.ly/plotly-2.32.0.min.js"></script>
+</head>
+<body>
+    <header class="topbar">
+        <div class="topbar-left">
+            <div class="logo">
+                <span class="material-symbols-outlined logo-icon">architecture</span>
+                <span class="logo-text">SANCTUM</span>
+            </div>
+            <nav class="nav-tabs">
+                <a class="nav-tab active" href="#">Dashboard</a>
+                <a class="nav-tab" href="#">Analysis</a>
+                <a class="nav-tab" href="#">3D View</a>
+            </nav>
+        </div>
+        <div class="topbar-right">
+            <button class="icon-btn">
+                <span class="material-symbols-outlined">notifications</span>
+            </button>
+            <button class="icon-btn">
+                <span class="material-symbols-outlined">settings</span>
+            </button>
+            <div class="user-avatar">
+                <span class="material-symbols-outlined">person</span>
+            </div>
+        </div>
+    </header>
+
+    <main class="main-content">
+        <!-- Left Panel - Input -->
+        <section class="left-panel">
+            <div class="panel-header">
+                <h1 class="panel-title">Floor Plan Input</h1>
+                <p class="panel-subtitle">Initialize structural analysis by defining spatial parameters.</p>
+            </div>
+
+            <!-- Upload Zone -->
+            <div class="upload-zone" id="dropzone">
+                <span class="material-symbols-outlined upload-icon">cloud_upload</span>
+                <p class="upload-text">Drop floor plan image here or click to upload</p>
+                <p class="upload-formats">Supported: DWG, DXF, PNG, JPEG</p>
+                <button class="upload-btn" id="btn-upload">
+                    Upload Image
+                </button>
+                <input type="file" id="file-input" accept="image/*" hidden>
+            </div>
+
+            <!-- Quick Actions -->
+            <div class="quick-actions">
+                <h2 class="section-title">
+                    <span class="section-dot"></span>
+                    Quick Actions
+                </h2>
+                <div class="action-grid">
+                    <button class="action-card" id="btn-sample">
+                        <span class="material-symbols-outlined action-icon">map</span>
+                        <div class="action-info">
+                            <p class="action-title">Use Sample Layout</p>
+                            <p class="action-desc">Industrial Complex A-1</p>
+                        </div>
+                    </button>
+                    <button class="action-card" id="btn-json">
+                        <span class="material-symbols-outlined action-icon">data_object</span>
+                        <div class="action-info">
+                            <p class="action-title">Load JSON</p>
+                            <p class="action-desc">Import structured schema</p>
+                        </div>
+                    </button>
+                    <button class="action-card danger" id="btn-clear">
+                        <span class="material-symbols-outlined action-icon">delete_sweep</span>
+                        <div class="action-info">
+                            <p class="action-title">Clear</p>
+                            <p class="action-desc">Reset all input data</p>
+                        </div>
+                    </button>
+                </div>
+            </div>
+
+            <!-- System Info -->
+            <div class="system-info">
+                <div class="system-header">
+                    <span class="system-label">Structural Engine</span>
+                    <span class="system-status">Active</span>
+                </div>
+                <div class="system-progress">
+                    <div class="progress-bar"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Right Panel - Preview -->
+        <section class="right-panel">
+            <div class="preview-bg">
+                <div class="dot-grid"></div>
+                <div class="gradient-overlay"></div>
+            </div>
+            
+            <div class="preview-placeholder" id="placeholder">
+                <div class="placeholder-icon">
+                    <span class="material-symbols-outlined">view_in_ar</span>
+                </div>
+                <h3 class="placeholder-title">Waiting for Input</h3>
+                <p class="placeholder-text">Upload a floor plan to begin structural intelligence analysis and 3D schematic generation.</p>
+            </div>
+
+            <img id="preview-image" class="preview-image" alt="Floor plan preview" hidden>
+            
+            <!-- Plotly 3D Viewer -->
+            <div id="plotly-viewer" style="position: absolute; top:0; left:0; width: 100%; height: 100%; z-index: 10; display: none;"></div>
+
+            <!-- Floating Analyze Button -->
+            <div class="analyze-float">
+                <div class="system-readout">
+                    <p class="readout-label">System Readiness</p>
+                    <div class="readout-dots">
+                        <span class="dot active"></span>
+                        <span class="dot"></span>
+                        <span class="dot"></span>
+                    </div>
+                </div>
+                <button class="analyze-btn" id="btn-analyze" disabled>
+                    <span class="material-symbols-outlined">analytics</span>
+                    <span class="analyze-label">Analyze</span>
+                </button>
+            </div>
+
+            <!-- Corner Annotations -->
+            <div class="corner-info top-right">
+                <p class="corner-label">Viewport 0.001</p>
+                <p class="corner-sublabel">Scale: 1:500 (mm)</p>
+            </div>
+            <div class="corner-info bottom-left">
+                <p class="corner-label">Coordinate System</p>
+                <p class="corner-sublabel">WGS84 / EPSG:3857</p>
+            </div>
+        </section>
+    </main>
+
+    <!-- Status Bar -->
+    <footer class="status-bar">
+        <div class="status-left">
+            <span class="material-symbols-outlined status-icon ready">check_circle</span>
+            <span class="status-text ready" id="status-text">Ready</span>
+        </div>
+        <div class="status-center">
+            <span class="status-item">
+                <span class="material-symbols-outlined">database</span>
+                DB: CONNECTED
+            </span>
+            <span class="status-item">
+                <span class="material-symbols-outlined">bolt</span>
+                LATENCY: 14MS
+            </span>
+        </div>
+        <div class="status-right">
+            <span class="status-item">
+                <span class="material-symbols-outlined">memory</span>
+                SANCTUM v1.0
+            </span>
+        </div>
+    </footer>
+
+    <script src="app.js"></script>
+</body>
+</html>
