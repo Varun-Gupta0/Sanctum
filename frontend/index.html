@@ -119,6 +119,18 @@
             <!-- Plotly 3D Viewer -->
             <div id="plotly-viewer" style="position: absolute; top:0; left:0; width: 100%; height: 100%; z-index: 10; display: none;"></div>
 
+            <!-- Phase Selector -->
+            <div class="phase-selector" id="phase-selector" style="display: none;">
+                <button class="phase-btn active" data-phase="phase_1_layout">1. Layout</button>
+                <button class="phase-btn" data-phase="phase_2_walls">2. Walls</button>
+                <button class="phase-btn" data-phase="phase_3_analysis">3. Analysis</button>
+                <button class="phase-btn" data-phase="phase_4_materials">4. Materials</button>
+                <button class="phase-btn" data-phase="phase_5_final">5. Final</button>
+                <button class="phase-btn play-btn" id="btn-autoplay" title="Auto-play phases">
+                    <span class="material-symbols-outlined" style="font-size: 18px;">play_arrow</span>
+                </button>
+            </div>
+
             <!-- Floating Analyze Button -->
             <div class="analyze-float">
                 <div class="system-readout">

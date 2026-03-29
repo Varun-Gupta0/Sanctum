@@ -118,6 +118,11 @@ document.addEventListener('DOMContentLoaded', () => {
             resultsContainer.style.display = 'none';
             resultsContainer.innerHTML = '';
         }
+        
+        const phaseSelector = document.getElementById('phase-selector');
+        if (phaseSelector) phaseSelector.style.display = 'none';
+        window.currentPhases = null;
+        if (typeof window.stopAutoplay === 'function') window.stopAutoplay();
     });
 
     // Sample button - uses default data from backend
@@ -244,22 +249,67 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             if (!response.ok) {
-                const error = await response.json();
-                throw new Error(error.error || 'Analysis failed');
+                const text = await response.text();
+                let errMsg = 'Analysis failed';
+                try {
+                    const errObj = JSON.parse(text);
+                    errMsg = errObj.error || errMsg;
+                } catch(e){}
+                throw new Error(errMsg);
             }
 
-            const result = await response.json();
+            // Stream processing
+            const reader = response.body.getReader();
+            const decoder = new TextDecoder();
             
-            // Render 3D Plotly if present
-            if (result.diagram) {
-                const fig = JSON.parse(result.diagram);
-                previewImage.hidden = true;
-                plotlyViewer.style.display = 'block';
-                Plotly.newPlot('plotly-viewer', fig.data, fig.layout, {responsive: true});
+            window.currentPhases = {};
+            document.getElementById('phase-selector').style.display = 'flex';
+            if (typeof window.stopAutoplay === 'function') window.stopAutoplay();
+            
+            let buffer = '';
+            
+            while (true) {
+                const { done, value } = await reader.read();
+                if (done) {
+                    if (buffer.trim()) {
+                        try {
+                            const parsed = JSON.parse(buffer);
+                            processPhase(parsed);
+                        } catch(e){}
+                    }
+                    break;
+                }
+                
+                buffer += decoder.decode(value, {stream: true});
+                const lines = buffer.split('\n');
+                buffer = lines.pop();
+                
+                for (const line of lines) {
+                    if (!line.trim()) continue;
+                    try {
+                        const parsed = JSON.parse(line);
+                        processPhase(parsed);
+                    } catch (e) {
+                        console.error('Error parsing chunk:', e);
+                    }
+                }
             }
             
-            // Display results
-            displayResults(result);
+            function processPhase(parsed) {
+                if (parsed.diagram) {
+                    let phaseKey = 'phase_5_final';
+                    if (parsed.phase === 'layout') phaseKey = 'phase_1_layout';
+                    if (parsed.phase === 'walls') phaseKey = 'phase_2_walls';
+                    if (parsed.phase === 'analysis') phaseKey = 'phase_3_analysis';
+                    if (parsed.phase === 'materials') phaseKey = 'phase_4_materials';
+                    
+                    window.currentPhases[phaseKey] = parsed.diagram;
+                    renderPhase(phaseKey);
+                }
+                if (parsed.phase === 'final') {
+                    displayResults(parsed);
+                }
+            }
             
             updateStatus('Analysis complete', true);
             
@@ -388,4 +438,60 @@ document.addEventListener('DOMContentLoaded', () => {
             statusText.classList.remove('ready');
         }
     }
+
+    // --- Phase and Autoplay logic ---
+    function renderPhase(phaseKey) {
+        if (!window.currentPhases || !window.currentPhases[phaseKey]) return;
+        
+        document.querySelectorAll('.phase-btn[data-phase]').forEach(btn => {
+            if (btn.dataset.phase === phaseKey) btn.classList.add('active');
+            else btn.classList.remove('active');
+        });
+        
+        const fig = JSON.parse(window.currentPhases[phaseKey]);
+        previewImage.hidden = true;
+        plotlyViewer.style.display = 'block';
+        Plotly.react('plotly-viewer', fig.data, fig.layout); 
+    }
+
+    document.querySelectorAll('.phase-btn[data-phase]').forEach(btn => {
+        btn.addEventListener('click', () => {
+            if (typeof window.stopAutoplay === 'function') window.stopAutoplay();
+            renderPhase(btn.dataset.phase);
+        });
+    });
+
+    let autoplayInterval = null;
+    const phasesOrder = ['phase_1_layout', 'phase_2_walls', 'phase_3_analysis', 'phase_4_materials', 'phase_5_final'];
+    const btnAutoplay = document.getElementById('btn-autoplay');
+    
+    function startAutoplay() {
+        if (autoplayInterval) return;
+        btnAutoplay.classList.add('playing');
+        btnAutoplay.querySelector('.material-symbols-outlined').textContent = 'pause';
+        
+        const currentBtn = document.querySelector('.phase-btn[data-phase].active');
+        let currentIdx = currentBtn ? phasesOrder.indexOf(currentBtn.dataset.phase) : 0;
+        
+        if (currentIdx === phasesOrder.length - 1) currentIdx = -1;
+        
+        autoplayInterval = setInterval(() => {
+            currentIdx++;
+            if (currentIdx >= phasesOrder.length) window.stopAutoplay();
+            else renderPhase(phasesOrder[currentIdx]);
+        }, 500);
+    }
+    
+    window.stopAutoplay = function() {
+        if (!autoplayInterval) return;
+        clearInterval(autoplayInterval);
+        autoplayInterval = null;
+        btnAutoplay.classList.remove('playing');
+        btnAutoplay.querySelector('.material-symbols-outlined').textContent = 'play_arrow';
+    };
+    
+    btnAutoplay.addEventListener('click', () => {
+        if (autoplayInterval) window.stopAutoplay();
+        else startAutoplay();
+    });
 });

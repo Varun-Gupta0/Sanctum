@@ -254,6 +254,17 @@ def get_risk_color(score: int) -> str:
     else: return "rgb(0, 217, 165)"              # Green
 
 
+def get_material_color(material: str) -> str:
+    mat = material.lower()
+    if 'brick' in mat: return "rgb(180, 70, 50)"      # Brown/Red
+    elif 'concrete' in mat: return "rgb(150, 150, 150)" # Gray
+    elif 'wood' in mat or 'timber' in mat: return "rgb(205, 133, 63)" # Peru / Wood
+    elif 'steel' in mat: return "rgb(176, 196, 222)"    # Steel Blue
+    elif 'drywall' in mat or 'gypsum' in mat: return "rgb(240, 240, 230)"
+    elif 'glass' in mat: return "rgb(135, 206, 235)"
+    else: return "rgb(200, 200, 200)"
+
+
 def wall_cuboid_vertices(x1: float, y1: float, x2: float, y2: float, height: float=3.0, thickness: float=0.2):
     angle = math.atan2(y2 - y1, x2 - x1)
     dx = - (thickness/2) * math.sin(angle)
@@ -264,10 +275,15 @@ def wall_cuboid_vertices(x1: float, y1: float, x2: float, y2: float, height: flo
     return xs, ys, zs
 
 
-def generate_plotly_json(rooms: list, results: list) -> str:
+def generate_plotly_json(rooms: list, results: list, phase: str = "final") -> str:
     """Generate the Plotly graph JSON mapping rooms and rendering individual risk-colored walls."""
     # Build base room figure
     fig, xmin, xmax, ymin, ymax = _build_figure(rooms)
+    
+    if phase == "layout":
+        fig.update_layout(paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)')
+        fig.update_scenes(xaxis_backgroundcolor='rgba(0,0,0,0)', yaxis_backgroundcolor='rgba(0,0,0,0)', zaxis_backgroundcolor='rgba(0,0,0,0)')
+        return fig.to_json()
     
     # Add walls as solid meshes over the rooms from the results array
     for item in results:
@@ -275,12 +291,22 @@ def generate_plotly_json(rooms: list, results: list) -> str:
         if "x1" not in w:
             continue
             
-        color = get_risk_color(item.get("risk_score", 0))
+        color = "rgb(150, 150, 150)"
+        
+        if phase == "walls":
+            color = "rgb(100, 100, 100)" if w.get("type") == "load_bearing" else "rgb(200, 200, 200)"
+        elif phase == "analysis":
+            color = get_risk_color(item.get("risk_score", 0))
+        elif phase == "materials" or phase == "final":
+            color = get_material_color(item.get("material", "Unknown"))
+            
         vx, vy, vz = wall_cuboid_vertices(w["x1"], w["y1"], w["x2"], w["y2"], height=ROOM_HEIGHT)
         
         name = w.get("id", "Wall")
         if w.get("type") == "load_bearing":
             name += " [Load Bearing]"
+        if phase == "materials" or phase == "final":
+            name += f" ({item.get('material', 'Unknown')})"
         
         fig.add_trace(go.Mesh3d(
             x=vx, y=vy, z=vz,
