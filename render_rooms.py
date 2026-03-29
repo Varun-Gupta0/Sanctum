@@ -6,6 +6,7 @@ from __future__ import annotations
 
 import colorsys
 import math
+from pathlib import Path
 
 import plotly.graph_objects as go
 import plotly.io as pio
@@ -117,7 +118,7 @@ def _parse_room(room: dict, index: int) -> tuple[str, float, float, float, float
     )
 
 
-def render_rooms(rooms: list) -> None:
+def render_rooms(rooms: list, output_html: str | None = None, auto_open: bool = True) -> None:
     fig = go.Figure()
 
     if not rooms:
@@ -235,7 +236,9 @@ def render_rooms(rooms: list) -> None:
         legend=dict(yanchor="top", y=0.98, xanchor="left", x=0.02, bgcolor="rgba(255,255,255,0.7)"),
     )
 
-    fig.show()
+    out_path = Path(output_html) if output_html else Path(__file__).resolve().parent / "floorplan_3d.html"
+    fig.write_html(str(out_path), include_plotlyjs="cdn", auto_open=auto_open)
+    print(f"Interactive plot: {out_path}")
 
 
 if __name__ == "__main__":
