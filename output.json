@@ -1,193 +1,308 @@
 {
   "rooms": [
     {
-      "name": "Living Room",
-      "width": 15,
-      "length": 18,
-      "x": 0,
-      "y": 0
+      "name": "Living/Dining 1",
+      "width": 12.2,
+      "length": 12.2,
+      "x": 2.7,
+      "y": 15.2
     },
     {
-      "name": "Kitchen",
-      "width": 12,
-      "length": 14,
-      "x": 15,
-      "y": 0
+      "name": "Living/Dining 2",
+      "width": 13.0,
+      "length": 13.0,
+      "x": 2.3,
+      "y": 14.8
     },
     {
-      "name": "Master Bedroom",
-      "width": 14,
-      "length": 16,
-      "x": 0,
-      "y": 18
+      "name": "Living/Dining 3",
+      "width": 12.0,
+      "length": 9.5,
+      "x": 2.8,
+      "y": 2.8
     },
     {
-      "name": "Bedroom 2",
-      "width": 12,
-      "length": 12,
-      "x": 14,
-      "y": 18
+      "name": "Living/Dining 4",
+      "width": 19.7,
+      "length": 24.7,
+      "x": 17.7,
+      "y": 2.7
     },
     {
-      "name": "Bathroom",
-      "width": 8,
-      "length": 10,
-      "x": 14,
-      "y": 30
+      "name": "Living/Dining 5",
+      "width": 20.5,
+      "length": 25.5,
+      "x": 17.3,
+      "y": 2.3
     },
     {
-      "name": "Hallway",
-      "width": 4,
-      "length": 12,
-      "x": 27,
-      "y": 0
+      "name": "Living/Dining 6",
+      "width": 13.2,
+      "length": 10.7,
+      "x": 2.2,
+      "y": 2.2
+    },
+    {
+      "name": "Living/Dining 7",
+      "width": 38.9,
+      "length": 28.9,
+      "x": 0.6,
+      "y": 0.6
     }
   ],
   "walls": [
     {
       "type": "load_bearing",
-      "length": 31
+      "length": 12.2
     },
     {
       "type": "load_bearing",
-      "length": 27
+      "length": 12.2
     },
     {
       "type": "load_bearing",
-      "length": 40
+      "length": 13.0
     },
     {
       "type": "load_bearing",
-      "length": 27
+      "length": 13.0
     },
     {
-      "type": "partition",
-      "length": 18
+      "type": "load_bearing",
+      "length": 9.5
     },
     {
-      "type": "partition",
-      "length": 14
+      "type": "load_bearing",
+      "length": 12.0
     },
     {
-      "type": "partition",
-      "length": 12
+      "type": "load_bearing",
+      "length": 24.7
     },
     {
-      "type": "partition",
-      "length": 10
+      "type": "load_bearing",
+      "length": 19.7
+    },
+    {
+      "type": "load_bearing",
+      "length": 25.5
+    },
+    {
+      "type": "load_bearing",
+      "length": 20.5
+    },
+    {
+      "type": "load_bearing",
+      "length": 10.7
+    },
+    {
+      "type": "load_bearing",
+      "length": 13.2
+    },
+    {
+      "type": "load_bearing",
+      "length": 28.9
+    },
+    {
+      "type": "load_bearing",
+      "length": 38.9
     }
   ],
   "results": [
     {
       "wall": {
         "type": "load_bearing",
-        "length": 31
+        "length": 12.2
       },
       "material": "RCC",
-      "explanation": "This load-bearing wall spans 31m, which is a critical long-span scenario. RCC is the only viable choice \u2014 it provides high compressive and tensile strength, excellent durability, fire-resistant. At 31m, the structure must resist significant bending moments and shear forces that neither brick nor unreinforced materials can handle safely.",
-      "confidence": "Low",
-      "suggestion": "Critical: Add intermediate column support and reduce effective span",
-      "why_not": {
-        "Steel Frame": "Steel frames excel in tension but are less efficient than RCC for compressive load-bearing applications. Steel also requires additional fire-proofing and corrosion protection.",
-        "Red Brick": "Red brick lacks the tensile reinforcement needed for load-bearing walls. Under sustained axial and lateral loads, brick masonry risks cracking and structural failure."
-      }
-    },
-    {
-      "wall": {
-        "type": "load_bearing",
-        "length": 27
-      },
-      "material": "RCC",
-      "explanation": "This load-bearing wall spans 27m, which is a critical long-span scenario. RCC is the only viable choice \u2014 it provides high compressive and tensile strength, excellent durability, fire-resistant. At 27m, the structure must resist significant bending moments and shear forces that neither brick nor unreinforced materials can handle safely.",
-      "confidence": "Low",
-      "suggestion": "Critical: Add intermediate column support and reduce effective span",
-      "why_not": {
-        "Steel Frame": "Steel frames excel in tension but are less efficient than RCC for compressive load-bearing applications. Steel also requires additional fire-proofing and corrosion protection.",
-        "Red Brick": "Red brick lacks the tensile reinforcement needed for load-bearing walls. Under sustained axial and lateral loads, brick masonry risks cracking and structural failure."
-      }
-    },
-    {
-      "wall": {
-        "type": "load_bearing",
-        "length": 40
-      },
-      "material": "RCC",
-      "explanation": "This load-bearing wall spans 40m, which is a critical long-span scenario. RCC is the only viable choice \u2014 it provides high compressive and tensile strength, excellent durability, fire-resistant. At 40m, the structure must resist significant bending moments and shear forces that neither brick nor unreinforced materials can handle safely.",
-      "confidence": "Low",
-      "suggestion": "Critical: Add intermediate column support and reduce effective span",
-      "why_not": {
-        "Steel Frame": "Steel frames excel in tension but are less efficient than RCC for compressive load-bearing applications. Steel also requires additional fire-proofing and corrosion protection.",
-        "Red Brick": "Red brick lacks the tensile reinforcement needed for load-bearing walls. Under sustained axial and lateral loads, brick masonry risks cracking and structural failure."
-      }
-    },
-    {
-      "wall": {
-        "type": "load_bearing",
-        "length": 27
-      },
-      "material": "RCC",
-      "explanation": "This load-bearing wall spans 27m, which is a critical long-span scenario. RCC is the only viable choice \u2014 it provides high compressive and tensile strength, excellent durability, fire-resistant. At 27m, the structure must resist significant bending moments and shear forces that neither brick nor unreinforced materials can handle safely.",
-      "confidence": "Low",
-      "suggestion": "Critical: Add intermediate column support and reduce effective span",
-      "why_not": {
-        "Steel Frame": "Steel frames excel in tension but are less efficient than RCC for compressive load-bearing applications. Steel also requires additional fire-proofing and corrosion protection.",
-        "Red Brick": "Red brick lacks the tensile reinforcement needed for load-bearing walls. Under sustained axial and lateral loads, brick masonry risks cracking and structural failure."
-      }
-    },
-    {
-      "wall": {
-        "type": "partition",
-        "length": 18
-      },
-      "material": "Steel Frame",
-      "explanation": "This partition wall spans 18m \u2014 a large open span requiring exceptional lateral rigidity. A steel frame provides high tensile strength, lightweight, ideal for large spans. For a non-load-bearing partition of this scale, steel offers the best strength-to-weight ratio without the cost and curing overhead of RCC.",
-      "confidence": "Low",
-      "suggestion": "Add column support or partition to reduce span below 15m",
-      "why_not": {
-        "RCC": "While RCC would provide adequate strength, it is unnecessarily expensive for a non-load-bearing wall. The structural overhead is not warranted.",
-        "Red Brick": "At 18m, red brick would require intermediate supports to prevent lateral instability. This adds cost and defeats the simplicity advantage of brick construction."
-      }
-    },
-    {
-      "wall": {
-        "type": "partition",
-        "length": 14
-      },
-      "material": "Steel Frame",
-      "explanation": "This partition wall spans 14m \u2014 a large open span requiring exceptional lateral rigidity. A steel frame provides high tensile strength, lightweight, ideal for large spans. For a non-load-bearing partition of this scale, steel offers the best strength-to-weight ratio without the cost and curing overhead of RCC.",
+      "explanation": "This load-bearing wall spans 12.2m, which is a critical long-span scenario. RCC is the only viable choice \u2014 it provides high compressive and tensile strength, excellent durability, fire-resistant. At 12.2m, the structure must resist significant bending moments and shear forces that neither brick nor unreinforced materials can handle safely.",
       "confidence": "Medium",
-      "suggestion": "Consider reinforcement or intermediate support",
+      "suggestion": "Reinforce with additional RCC beams at mid-span",
       "why_not": {
-        "RCC": "While RCC would provide adequate strength, it is unnecessarily expensive for a non-load-bearing wall. The structural overhead is not warranted.",
-        "Red Brick": "At 14m, red brick would require intermediate supports to prevent lateral instability. This adds cost and defeats the simplicity advantage of brick construction."
+        "Steel Frame": "Steel frames excel in tension but are less efficient than RCC for compressive load-bearing applications. Steel also requires additional fire-proofing and corrosion protection.",
+        "Red Brick": "Red brick lacks the tensile reinforcement needed for load-bearing walls. Under sustained axial and lateral loads, brick masonry risks cracking and structural failure."
       }
     },
     {
       "wall": {
-        "type": "partition",
-        "length": 12
+        "type": "load_bearing",
+        "length": 12.2
       },
-      "material": "Steel Frame",
-      "explanation": "This partition wall spans 12m \u2014 a large open span requiring exceptional lateral rigidity. A steel frame provides high tensile strength, lightweight, ideal for large spans. For a non-load-bearing partition of this scale, steel offers the best strength-to-weight ratio without the cost and curing overhead of RCC.",
+      "material": "RCC",
+      "explanation": "This load-bearing wall spans 12.2m, which is a critical long-span scenario. RCC is the only viable choice \u2014 it provides high compressive and tensile strength, excellent durability, fire-resistant. At 12.2m, the structure must resist significant bending moments and shear forces that neither brick nor unreinforced materials can handle safely.",
       "confidence": "Medium",
-      "suggestion": "Consider reinforcement or intermediate support",
+      "suggestion": "Reinforce with additional RCC beams at mid-span",
       "why_not": {
-        "RCC": "While RCC would provide adequate strength, it is unnecessarily expensive for a non-load-bearing wall. The structural overhead is not warranted.",
-        "Red Brick": "At 12m, red brick would require intermediate supports to prevent lateral instability. This adds cost and defeats the simplicity advantage of brick construction."
+        "Steel Frame": "Steel frames excel in tension but are less efficient than RCC for compressive load-bearing applications. Steel also requires additional fire-proofing and corrosion protection.",
+        "Red Brick": "Red brick lacks the tensile reinforcement needed for load-bearing walls. Under sustained axial and lateral loads, brick masonry risks cracking and structural failure."
       }
     },
     {
       "wall": {
-        "type": "partition",
-        "length": 10
+        "type": "load_bearing",
+        "length": 13.0
       },
-      "material": "Steel Frame",
-      "explanation": "This partition wall spans 10m, exceeding the standard 5m masonry limit. A steel frame provides high tensile strength, lightweight, ideal for large spans, ensuring the partition remains stable across the full span without intermediate supports. This balances structural performance with cost efficiency.",
+      "material": "RCC",
+      "explanation": "This load-bearing wall spans 13.0m, which is a critical long-span scenario. RCC is the only viable choice \u2014 it provides high compressive and tensile strength, excellent durability, fire-resistant. At 13.0m, the structure must resist significant bending moments and shear forces that neither brick nor unreinforced materials can handle safely.",
+      "confidence": "Medium",
+      "suggestion": "Reinforce with additional RCC beams at mid-span",
+      "why_not": {
+        "Steel Frame": "Steel frames excel in tension but are less efficient than RCC for compressive load-bearing applications. Steel also requires additional fire-proofing and corrosion protection.",
+        "Red Brick": "Red brick lacks the tensile reinforcement needed for load-bearing walls. Under sustained axial and lateral loads, brick masonry risks cracking and structural failure."
+      }
+    },
+    {
+      "wall": {
+        "type": "load_bearing",
+        "length": 13.0
+      },
+      "material": "RCC",
+      "explanation": "This load-bearing wall spans 13.0m, which is a critical long-span scenario. RCC is the only viable choice \u2014 it provides high compressive and tensile strength, excellent durability, fire-resistant. At 13.0m, the structure must resist significant bending moments and shear forces that neither brick nor unreinforced materials can handle safely.",
+      "confidence": "Medium",
+      "suggestion": "Reinforce with additional RCC beams at mid-span",
+      "why_not": {
+        "Steel Frame": "Steel frames excel in tension but are less efficient than RCC for compressive load-bearing applications. Steel also requires additional fire-proofing and corrosion protection.",
+        "Red Brick": "Red brick lacks the tensile reinforcement needed for load-bearing walls. Under sustained axial and lateral loads, brick masonry risks cracking and structural failure."
+      }
+    },
+    {
+      "wall": {
+        "type": "load_bearing",
+        "length": 9.5
+      },
+      "material": "RCC",
+      "explanation": "This load-bearing wall spans 9.5m and requires structural integrity under load. RCC offers high compressive and tensile strength, excellent durability, fire-resistant, making it the safest and most reliable choice. The 90.25m\u00b2 room area confirms that this wall supports meaningful structural weight from above.",
       "confidence": "High",
-      "suggestion": "No special intervention needed",
+      "suggestion": "Standard RCC construction adequate; verify beam depth",
       "why_not": {
-        "RCC": "While RCC would provide adequate strength, it is unnecessarily expensive for a non-load-bearing wall. The structural overhead is not warranted.",
-        "Red Brick": "At 10m, red brick would require intermediate supports to prevent lateral instability. This adds cost and defeats the simplicity advantage of brick construction."
+        "Steel Frame": "Steel frames excel in tension but are less efficient than RCC for compressive load-bearing applications. Steel also requires additional fire-proofing and corrosion protection.",
+        "Red Brick": "Red brick lacks the tensile reinforcement needed for load-bearing walls. Under sustained axial and lateral loads, brick masonry risks cracking and structural failure."
+      }
+    },
+    {
+      "wall": {
+        "type": "load_bearing",
+        "length": 12.0
+      },
+      "material": "RCC",
+      "explanation": "This load-bearing wall spans 12.0m, which is a critical long-span scenario. RCC is the only viable choice \u2014 it provides high compressive and tensile strength, excellent durability, fire-resistant. At 12.0m, the structure must resist significant bending moments and shear forces that neither brick nor unreinforced materials can handle safely.",
+      "confidence": "Medium",
+      "suggestion": "Reinforce with additional RCC beams at mid-span",
+      "why_not": {
+        "Steel Frame": "Steel frames excel in tension but are less efficient than RCC for compressive load-bearing applications. Steel also requires additional fire-proofing and corrosion protection.",
+        "Red Brick": "Red brick lacks the tensile reinforcement needed for load-bearing walls. Under sustained axial and lateral loads, brick masonry risks cracking and structural failure."
+      }
+    },
+    {
+      "wall": {
+        "type": "load_bearing",
+        "length": 24.7
+      },
+      "material": "RCC",
+      "explanation": "This load-bearing wall spans 24.7m, which is a critical long-span scenario. RCC is the only viable choice \u2014 it provides high compressive and tensile strength, excellent durability, fire-resistant. At 24.7m, the structure must resist significant bending moments and shear forces that neither brick nor unreinforced materials can handle safely.",
+      "confidence": "Low",
+      "suggestion": "Critical: Add intermediate column support and reduce effective span",
+      "why_not": {
+        "Steel Frame": "Steel frames excel in tension but are less efficient than RCC for compressive load-bearing applications. Steel also requires additional fire-proofing and corrosion protection.",
+        "Red Brick": "Red brick lacks the tensile reinforcement needed for load-bearing walls. Under sustained axial and lateral loads, brick masonry risks cracking and structural failure."
+      }
+    },
+    {
+      "wall": {
+        "type": "load_bearing",
+        "length": 19.7
+      },
+      "material": "RCC",
+      "explanation": "This load-bearing wall spans 19.7m, which is a critical long-span scenario. RCC is the only viable choice \u2014 it provides high compressive and tensile strength, excellent durability, fire-resistant. At 19.7m, the structure must resist significant bending moments and shear forces that neither brick nor unreinforced materials can handle safely.",
+      "confidence": "Low",
+      "suggestion": "Critical: Add intermediate column support and reduce effective span",
+      "why_not": {
+        "Steel Frame": "Steel frames excel in tension but are less efficient than RCC for compressive load-bearing applications. Steel also requires additional fire-proofing and corrosion protection.",
+        "Red Brick": "Red brick lacks the tensile reinforcement needed for load-bearing walls. Under sustained axial and lateral loads, brick masonry risks cracking and structural failure."
+      }
+    },
+    {
+      "wall": {
+        "type": "load_bearing",
+        "length": 25.5
+      },
+      "material": "RCC",
+      "explanation": "This load-bearing wall spans 25.5m, which is a critical long-span scenario. RCC is the only viable choice \u2014 it provides high compressive and tensile strength, excellent durability, fire-resistant. At 25.5m, the structure must resist significant bending moments and shear forces that neither brick nor unreinforced materials can handle safely.",
+      "confidence": "Low",
+      "suggestion": "Critical: Add intermediate column support and reduce effective span",
+      "why_not": {
+        "Steel Frame": "Steel frames excel in tension but are less efficient than RCC for compressive load-bearing applications. Steel also requires additional fire-proofing and corrosion protection.",
+        "Red Brick": "Red brick lacks the tensile reinforcement needed for load-bearing walls. Under sustained axial and lateral loads, brick masonry risks cracking and structural failure."
+      }
+    },
+    {
+      "wall": {
+        "type": "load_bearing",
+        "length": 20.5
+      },
+      "material": "RCC",
+      "explanation": "This load-bearing wall spans 20.5m, which is a critical long-span scenario. RCC is the only viable choice \u2014 it provides high compressive and tensile strength, excellent durability, fire-resistant. At 20.5m, the structure must resist significant bending moments and shear forces that neither brick nor unreinforced materials can handle safely.",
+      "confidence": "Low",
+      "suggestion": "Critical: Add intermediate column support and reduce effective span",
+      "why_not": {
+        "Steel Frame": "Steel frames excel in tension but are less efficient than RCC for compressive load-bearing applications. Steel also requires additional fire-proofing and corrosion protection.",
+        "Red Brick": "Red brick lacks the tensile reinforcement needed for load-bearing walls. Under sustained axial and lateral loads, brick masonry risks cracking and structural failure."
+      }
+    },
+    {
+      "wall": {
+        "type": "load_bearing",
+        "length": 10.7
+      },
+      "material": "RCC",
+      "explanation": "This load-bearing wall spans 10.7m, which is a critical long-span scenario. RCC is the only viable choice \u2014 it provides high compressive and tensile strength, excellent durability, fire-resistant. At 10.7m, the structure must resist significant bending moments and shear forces that neither brick nor unreinforced materials can handle safely.",
+      "confidence": "Medium",
+      "suggestion": "Reinforce with additional RCC beams at mid-span",
+      "why_not": {
+        "Steel Frame": "Steel frames excel in tension but are less efficient than RCC for compressive load-bearing applications. Steel also requires additional fire-proofing and corrosion protection.",
+        "Red Brick": "Red brick lacks the tensile reinforcement needed for load-bearing walls. Under sustained axial and lateral loads, brick masonry risks cracking and structural failure."
+      }
+    },
+    {
+      "wall": {
+        "type": "load_bearing",
+        "length": 13.2
+      },
+      "material": "RCC",
+      "explanation": "This load-bearing wall spans 13.2m, which is a critical long-span scenario. RCC is the only viable choice \u2014 it provides high compressive and tensile strength, excellent durability, fire-resistant. At 13.2m, the structure must resist significant bending moments and shear forces that neither brick nor unreinforced materials can handle safely.",
+      "confidence": "Medium",
+      "suggestion": "Reinforce with additional RCC beams at mid-span",
+      "why_not": {
+        "Steel Frame": "Steel frames excel in tension but are less efficient than RCC for compressive load-bearing applications. Steel also requires additional fire-proofing and corrosion protection.",
+        "Red Brick": "Red brick lacks the tensile reinforcement needed for load-bearing walls. Under sustained axial and lateral loads, brick masonry risks cracking and structural failure."
+      }
+    },
+    {
+      "wall": {
+        "type": "load_bearing",
+        "length": 28.9
+      },
+      "material": "RCC",
+      "explanation": "This load-bearing wall spans 28.9m, which is a critical long-span scenario. RCC is the only viable choice \u2014 it provides high compressive and tensile strength, excellent durability, fire-resistant. At 28.9m, the structure must resist significant bending moments and shear forces that neither brick nor unreinforced materials can handle safely.",
+      "confidence": "Low",
+      "suggestion": "Critical: Add intermediate column support and reduce effective span",
+      "why_not": {
+        "Steel Frame": "Steel frames excel in tension but are less efficient than RCC for compressive load-bearing applications. Steel also requires additional fire-proofing and corrosion protection.",
+        "Red Brick": "Red brick lacks the tensile reinforcement needed for load-bearing walls. Under sustained axial and lateral loads, brick masonry risks cracking and structural failure."
+      }
+    },
+    {
+      "wall": {
+        "type": "load_bearing",
+        "length": 38.9
+      },
+      "material": "RCC",
+      "explanation": "This load-bearing wall spans 38.9m, which is a critical long-span scenario. RCC is the only viable choice \u2014 it provides high compressive and tensile strength, excellent durability, fire-resistant. At 38.9m, the structure must resist significant bending moments and shear forces that neither brick nor unreinforced materials can handle safely.",
+      "confidence": "Low",
+      "suggestion": "Critical: Add intermediate column support and reduce effective span",
+      "why_not": {
+        "Steel Frame": "Steel frames excel in tension but are less efficient than RCC for compressive load-bearing applications. Steel also requires additional fire-proofing and corrosion protection.",
+        "Red Brick": "Red brick lacks the tensile reinforcement needed for load-bearing walls. Under sustained axial and lateral loads, brick masonry risks cracking and structural failure."
       }
     }
   ]
