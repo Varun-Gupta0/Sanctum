@@ -95,3 +95,8 @@ This log tracks the development of the Intelligence Layer (Logic + Reasoning) fo
   - `6beb935` fix: sync Y-Intelligence into app.py
   - `f4bd412` feat: mayank's extensible pipeline (already present)
 - **Status**: ✅ `grvchanr` branch is fully merged and pushed.
+
+## 🕒 [2026-03-29 19:35] — Phase 13: Image Mode Parser
+- **Task**: Create an OpenCV-based script to extract room boundaries and features from a floorplan image without complex deep learning.
+- **Result**: Implemented `image_parser.py` using contours and bounding box heuristics.
+- **Strategy**: Uses thresholding, morphological closing to fill gaps, and contour detection to find rooms. Maps regions to general room types based on computed area in square meters. Extracted features map exactly to `data.py` format (`width`, `length`, `x`, `y`).
