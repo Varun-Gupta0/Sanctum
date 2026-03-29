@@ -54,6 +54,8 @@ def run_pipeline(
         Path for JSON report output (default: "output.json")
     render : bool
         Whether to render 3D visualization (default: True)
+    data_dict : dict | None
+        Direct data dictionary (bypasses file loading)
 
     Returns
     -------
@@ -70,12 +72,19 @@ def run_pipeline(
     results = []
     for wall in walls:
         adapted = adapt_wall(wall)
-        material = recommend_material(adapted)
-        explanation = generate_explanation(adapted, material)
-        risk_score = calculate_risk_score(adapted, material)
+        
+        material_options = recommend_material(adapted)
+        
+        top_material = material_options[0]["name"] if material_options else "Red Brick"
+        
+        explanation = generate_explanation(adapted, material_options)
+        
+        risk_score = calculate_risk_score(adapted, top_material)
+        
         results.append({
             "wall": wall,
-            "material": material,
+            "material": top_material,
+            "material_options": material_options,
             "explanation": explanation,
             "risk_score": risk_score,
         })

@@ -320,6 +320,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     roomWalls.forEach((item, index) => {
                         const wall = item.wall;
                         const material = item.material;
+                        const materialOptions = item.material_options || [{name: material, tradeoff_score: 0}];
                         const explanation = item.explanation;
                         const score = item.risk_score || 0;
                         
@@ -327,6 +328,21 @@ document.addEventListener('DOMContentLoaded', () => {
                         if (score >= 80) { risk = 'High'; riskColor = '#FF4757'; }
                         else if (score >= 50) { risk = 'Medium'; riskColor = '#FFB800'; }
                         else if (score >= 30) { risk = 'Elevated'; riskColor = '#FDE047'; }
+                        
+                        const optionsHtml = materialOptions.map((opt, optIdx) => {
+                            const rankBadge = optIdx === 0 ? '<span style="font-size:9px;background:#00D9A5;color:#000;padding:1px 4px;border-radius:3px;margin-right:4px;">BEST</span>' : 
+                                             optIdx === 1 ? '<span style="font-size:9px;background:#FFB800;color:#000;padding:1px 4px;border-radius:3px;margin-right:4px;">2nd</span>' :
+                                             '<span style="font-size:9px;background:#6c5ce7;color:#fff;padding:1px 4px;border-radius:3px;margin-right:4px;">3rd</span>';
+                            return `
+                                <div style="display: flex; justify-content: space-between; align-items: center; padding: 6px 8px; background: ${optIdx === 0 ? 'rgba(0,217,165,0.1)' : 'rgba(255,255,255,0.03)'}; border-radius: 6px; margin-bottom: 4px;">
+                                    <div>
+                                        ${rankBadge}
+                                        <span style="font-size: 12px; font-weight: 600; color: ${optIdx === 0 ? '#00D9A5' : 'white'};">${opt.name}</span>
+                                    </div>
+                                    <span style="font-size: 10px; color: var(--color-outline);">Score: ${opt.tradeoff_score || '-'}</span>
+                                </div>
+                            `;
+                        }).join('');
                         
                         html += `
                             <div style="margin-bottom: 16px; padding-left: 8px; border-left: 2px solid ${riskColor}50;">
@@ -339,10 +355,10 @@ document.addEventListener('DOMContentLoaded', () => {
                                     </span>
                                 </div>
                                 
-                                <div style="display: grid; grid-template-columns: 1fr; gap: 4px; margin-bottom: 8px;">
-                                    <div>
-                                        <span style="font-size: 10px; color: var(--color-outline); text-transform: uppercase;">Material:</span>
-                                        <span style="font-size: 12px; font-weight: 600; color: white;">${material}</span>
+                                <div style="margin-bottom: 8px;">
+                                    <span style="font-size: 10px; color: var(--color-outline); text-transform: uppercase;">Recommended Materials:</span>
+                                    <div style="margin-top: 6px;">
+                                        ${optionsHtml}
                                     </div>
                                 </div>
                                 
