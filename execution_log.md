@@ -65,3 +65,12 @@ This log tracks the development of the Intelligence Layer (Logic + Reasoning) fo
   - Fire-sensitivity awareness (Kitchen → fire-resistant preference)
   - Comparative reasoning ("Why NOT brick? → lacks tensile reinforcement for load-bearing")
 - **Status**: ✅ All modules verified standalone. Ready for X integration.
+
+## 🕒 [2026-03-29 17:04] — Phase 11: Unified Integration (X + Y)
+- **Integration Status**: ✅ **FULL SUCCESS**. Branch X (System) and Y (Intelligence) are now synchronized.
+- **Actions Taken**:
+    - Refactored \`app.py\` to remove redundant local logic and adopt the Intelligence Layer.
+    - Linked \`render_rooms\` to use real-time reasoning results (\`confidence\`, \`material\`, \`suggestion\`).
+    - Standardized data flow: \`data.py\` → \`analyze.py\` → \`materials.py\` → \`explain.py\` → \`app.py\` Visualization.
+    - Verified \`output.json\` generation (Phase 2 core goal).
+- **Result**: System now detects critical structural risks (e.g., Living Room 18m span) and suggests reinforcements automatically.
