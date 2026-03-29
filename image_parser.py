@@ -40,26 +40,32 @@ def extract_rooms_from_image(image_path: str, scale_factor: float = 0.05) -> dic
     # Invert back to make the empty rooms white (255) and walls black (0)
     rooms_mask = cv2.bitwise_not(closing)
     
-    # 5. Extract contours of the white regions (the rooms)
-    contours, _ = cv2.findContours(rooms_mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    # 5. Find all regions
+    contours, _ = cv2.findContours(rooms_mask, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
+    print(f"[DEBUG] Found {len(contours)} potential regions.")
 
     rooms = []
     walls = []
     
     # Heuristics for filtering contours
-    min_area = 500  # ignore noise
-    img_area = img.shape[0] * img.shape[1]
+    min_area = 500  # pixels
+    img_h, img_w = img.shape
+    img_area = img_w * img_h
     
     room_count = 1
     
     for cnt in contours:
         area = cv2.contourArea(cnt)
-        # Ignore tiny spots or the entire image boundary
-        if area < min_area or area > img_area * 0.9:
+        # Skip tiny areas and the full-image bounding box
+        if area < min_area or area > img_area * 0.95:
             continue
             
-        # Get bounding box
         x, y, w, h = cv2.boundingRect(cnt)
+        
+        # Another heuristic: ignore very long/thin objects (those might be hallway segments vs rooms)
+        aspect_ratio = w / float(h)
+        if aspect_ratio > 10 or aspect_ratio < 0.1:
+            continue
         
         # Convert pixel scale to meters
         width_m = round(w * scale_factor, 1)

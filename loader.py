@@ -1,6 +1,6 @@
 """
 Data Loader — X (Structure + Pipeline Layer)
-Loads room/wall data from JSON or falls back to data.py defaults.
+Loads room/wall data from JSON, Images, or falls back to data.py defaults.
 """
 
 import json
@@ -8,16 +8,17 @@ from pathlib import Path
 from typing import Optional
 
 import data
+from image_parser import extract_rooms_from_image
 
 
 def load_data(path: Optional[str] = None) -> dict:
-    """Load room and wall data from a JSON file or fall back to defaults.
+    """Load room and wall data from a JSON or Image file, or fall back to defaults.
 
     Parameters
     ----------
     path : str | None
-        Path to JSON input file. If None or file doesn't exist,
-        falls back to data.py defaults.
+        Path to JSON or Image (.png, .jpg, .jpeg) input file. 
+        If None, or file not found, falls back to data.py defaults.
 
     Returns
     -------
@@ -27,15 +28,24 @@ def load_data(path: Optional[str] = None) -> dict:
     if path:
         file_path = Path(path)
         if file_path.exists():
-            with open(file_path, "r", encoding="utf-8") as f:
-                loaded = json.load(f)
-            print(f"[LOADER] Reading from {file_path.name}")
-            _validate_data(loaded)
-            return loaded
+            # 1. Image Input Mode
+            if file_path.suffix.lower() in [".png", ".jpg", ".jpeg"]:
+                print(f"[LOADER] Image Mode active. Extracting layout from {file_path.name}")
+                return extract_rooms_from_image(str(file_path), scale_factor=0.05)
+            
+            # 2. Standard JSON Input
+            try:
+                with open(file_path, "r", encoding="utf-8") as f:
+                    loaded = json.load(f)
+                print(f"[LOADER] Reading from {file_path.name}")
+                _validate_data(loaded)
+                return loaded
+            except Exception as e:
+                print(f"[LOADER] Error reading JSON '{path}': {e}")
         else:
-            print(f"[LOADER] File '{path}' not found, using default layout from data.py")
+            print(f"[LOADER] File '{path}' not found, using default layout.")
 
-    print("[LOADER] Using default layout from data.py")
+    print("[LOADER] Falling back to default layout from data.py")
     return {
         "rooms": data.rooms,
         "walls": data.walls,
