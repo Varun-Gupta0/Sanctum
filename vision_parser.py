@@ -1,26 +1,24 @@
 """
-Vision Parser — X (Computer Vision Layer)
-Part of the AI-based Structural Intelligence System.
+Vision Parser — Clean Stable Version (Hackathon Ready)
 
-Parses floor plan images using OpenCV and/or LLM with vision capabilities.
-Converts uploaded images into structured JSON (rooms + walls).
+- Uses OpenCV only (fast & reliable)
+- Extracts rooms using contours
+- Generates consistent rooms + walls
+- Normalized scaling (no crazy 50m rooms)
 """
 
-import json
 import os
+import io
+import json
+import numpy as np
+import cv2
+from PIL import Image
 
 try:
-    import numpy as np
-    import cv2
-    CV2_AVAILABLE = True
+    from dotenv import load_dotenv
+    load_dotenv()
 except ImportError:
-    CV2_AVAILABLE = False
-
-try:
-    from PIL import Image
-    PIL_AVAILABLE = True
-except ImportError:
-    PIL_AVAILABLE = False
+    pass
 
 try:
     import google.genai as genai
@@ -29,179 +27,193 @@ except ImportError:
     GEMINI_AVAILABLE = False
 
 
+# -------------------------------
+# MAIN ENTRY
+# -------------------------------
+def is_valid_result(result):
+    rooms = result.get("rooms", [])
+
+    # Must detect enough rooms
+    if len(rooms) < 3:
+        return False
+
+    # Reject unrealistic scaling
+    for r in rooms:
+        if r["width"] > 20 or r["length"] > 20:
+            return False
+        if r["width"] < 2 or r["length"] < 2:
+            return False
+
+    return True
+
 def parse_floor_plan(image_data: bytes) -> dict:
-    """Parse a floor plan image into structured JSON format.
-    
-    Parameters
-    ----------
-    image_data : bytes
-        Raw image bytes from uploaded file
-    
-    Returns
-    -------
-    dict
-        Contains 'rooms' and 'walls' arrays in our standard format
-    """
-    if not CV2_AVAILABLE:
+    nparr = np.frombuffer(image_data, np.uint8)
+    img = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
+
+    if img is None:
         return get_default_structure()
-    
-    try:
-        nparr = np.frombuffer(image_data, np.uint8)
-        img = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
-        
-        if img is None:
-            raise ValueError("Could not decode image")
-            
-        return parse_with_opencv(img)
-        
-    except Exception as e:
-        print(f"OpenCV parsing failed: {e}")
+
+    # Step 1: OpenCV
+    opencv_result = parse_with_opencv(img)
+
+    # Step 2: Validate
+    if is_valid_result(opencv_result):
+        print("Using OpenCV result")
+        return opencv_result
+
+    print("OpenCV weak -> switching to Gemini")
+
+    # Step 3: Gemini fallback
+    if GEMINI_AVAILABLE and os.environ.get("GEMINI_API_KEY"):
         try:
             return parse_with_llm_fallback(image_data)
-        except Exception as llm_error:
-            print(f"LLM fallback also failed: {llm_error}")
-            raise ValueError(f"Could not parse floor plan: {e}")
+        except Exception as e:
+            print("Gemini failed:", e)
+
+    # Step 4: fallback
+    return opencv_result if opencv_result else get_default_structure()
 
 
+# -------------------------------
+# CORE LOGIC
+# -------------------------------
 def parse_with_opencv(img: np.ndarray) -> dict:
-    """Use OpenCV to extract rooms and walls from floor plan image."""
     gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-    
-    _, binary = cv2.threshold(gray, 200, 255, cv2.THRESH_BINARY_INV)
-    
-    kernel = np.ones((3, 3), np.uint8)
-    binary = cv2.dilate(binary, kernel, iterations=2)
-    binary = cv2.erode(binary, kernel, iterations=1)
-    
-    contours, _ = cv2.findContours(binary, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-    
+
+    # Threshold (walls = white)
+    _, thresh = cv2.threshold(gray, 200, 255, cv2.THRESH_BINARY_INV)
+
+    # Close gaps (doors/windows)
+    kernel = np.ones((5, 5), np.uint8)
+    closed = cv2.morphologyEx(thresh, cv2.MORPH_CLOSE, kernel, iterations=2)
+
+    contours, _ = cv2.findContours(
+        closed, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE
+    )
+
+    img_h, img_w = img.shape[:2]
+    img_area = img_h * img_w
+
     rooms = []
-    walls = []
-    room_id_counter = 1
-    wall_id_counter = 1
-    
-    min_area = img.shape[0] * img.shape[1] * 0.01
-    
+
+    # Normalize scale -> max ~20 meters
+    scale_factor = 20 / max(img_w, img_h)
+
+    # Ignore largest contour (outer boundary)
+    contours = sorted(contours, key=cv2.contourArea, reverse=True)
+    if len(contours) > 0:
+        contours = contours[1:]
+
     for cnt in contours:
         area = cv2.contourArea(cnt)
-        if area < min_area:
-            continue
-            
         x, y, w, h = cv2.boundingRect(cnt)
-        
-        room_name = f"Room {room_id_counter}"
-        if area > min_area * 3:
-            room_name = f"Living Room" if room_id_counter == 1 else f"Room {room_id_counter}"
-        
-        scale_factor = 0.1
+
+        if area < 1000: continue
+        if w < 20 or h < 20: continue
+        if w/h > 5 or h/w > 5: continue
+
+        width = round(w * scale_factor, 1)
+        length = round(h * scale_factor, 1)
+
         rooms.append({
-            "id": f"room_{room_id_counter}",
-            "name": room_name,
-            "width": int(w * scale_factor),
-            "length": int(h * scale_factor),
-            "x": int(x * scale_factor),
-            "y": int(y * scale_factor)
+            "width": width,
+            "length": length,
+            "x": round(x * scale_factor, 1),
+            "y": round(y * scale_factor, 1)
         })
-        
-        wall_thickness = detect_wall_thickness(cnt, img)
-        is_load_bearing = wall_thickness > 15 or w > img.shape[1] * 0.4
-        
-        walls.append({
-            "id": f"w{wall_id_counter}",
-            "type": "load_bearing" if is_load_bearing else "partition",
-            "length": int(max(w, h) * scale_factor),
-            "x1": int(x * scale_factor),
-            "y1": int(y * scale_factor),
-            "x2": int((x + w) * scale_factor),
-            "y2": int((y + h) * scale_factor),
-            "room_id": f"room_{room_id_counter}"
-        })
-        
-        wall_id_counter += 1
-        room_id_counter += 1
-    
+
+    # Sort rooms for consistency
+    rooms.sort(key=lambda r: (r["y"], r["x"]))
+
+    # Assign IDs and names after sorting
+    for idx, r in enumerate(rooms, 1):
+        r["id"] = f"room_{idx}"
+        r["name"] = classify_room(r["width"], r["length"], idx)
+
+    print(f"Detected {len(rooms)} rooms using OpenCV")
+
     if not rooms:
         return get_default_structure()
-    
+
     walls = infer_walls_from_rooms(rooms)
-    
+
     return {"rooms": rooms, "walls": walls}
 
 
-def detect_wall_thickness(contour: np.ndarray, img: np.ndarray) -> float:
-    """Detect wall thickness from contour."""
-    x, y, w, h = cv2.boundingRect(contour)
-    return max(w, h)
+# -------------------------------
+# ROOM CLASSIFICATION (SIMPLE)
+# -------------------------------
+def classify_room(width, length, idx):
+    area = width * length
+
+    if area > 25:
+        return f"Living Room {idx}"
+    elif area < 6:
+        return f"Bathroom {idx}"
+    elif area < 12:
+        return f"Kitchen {idx}"
+    else:
+        return f"Bedroom {idx}"
 
 
-def infer_walls_from_rooms(rooms: list) -> list:
-    """Generate walls based on room boundaries."""
+# -------------------------------
+# WALL GENERATION (CLEAN)
+# -------------------------------
+def infer_walls_from_rooms(rooms):
     walls = []
     wall_id = 1
-    
+
     for room in rooms:
         x, y = room["x"], room["y"]
         w, l = room["width"], room["length"]
-        
-        is_load_bearing = w > 10 or l > 15
-        
+
+        # simple structural rule
+        is_load_bearing = max(w, l) > 5
+        wall_type = "load_bearing" if is_load_bearing else "partition"
+
         walls.extend([
-            {
-                "id": f"w{wall_id}",
-                "type": "load_bearing" if is_load_bearing else "partition",
-                "length": l,
-                "x1": x, "y1": y,
-                "x2": x, "y2": y + l,
-                "room_id": room["id"]
-            },
-            {
-                "id": f"w{wall_id + 1}",
-                "type": "load_bearing" if is_load_bearing else "partition",
-                "length": w,
-                "x1": x, "y1": y,
-                "x2": x + w, "y2": y,
-                "room_id": room["id"]
-            }
+            {"id": f"w{wall_id}", "type": wall_type, "length": w, "x1": x, "y1": y, "x2": x + w, "y2": y, "room_id": room["id"]},
+            {"id": f"w{wall_id+1}", "type": wall_type, "length": w, "x1": x, "y1": y + l, "x2": x + w, "y2": y + l, "room_id": room["id"]},
+            {"id": f"w{wall_id+2}", "type": wall_type, "length": l, "x1": x, "y1": y, "x2": x, "y2": y + l, "room_id": room["id"]},
+            {"id": f"w{wall_id+3}", "type": wall_type, "length": l, "x1": x + w, "y1": y, "x2": x + w, "y2": y + l, "room_id": room["id"]}
         ])
-        wall_id += 2
-    
+
+        wall_id += 4
+
     return walls
 
 
-def get_default_structure() -> dict:
-    """Return default structure when parsing fails."""
-    return {
-        "rooms": [
-            {"id": "room_1", "name": "Living Room", "width": 15, "length": 18, "x": 0, "y": 0},
-            {"id": "room_2", "name": "Kitchen", "width": 12, "length": 14, "x": 15, "y": 0},
-        ],
-        "walls": [
-            {"id": "w1", "type": "load_bearing", "length": 18, "x1": 0, "y1": 0, "x2": 0, "y2": 18, "room_id": "room_1"},
-            {"id": "w2", "type": "load_bearing", "length": 15, "x1": 0, "y1": 0, "x2": 15, "y2": 0, "room_id": "room_1"},
-        ]
-    }
-
-
+# -------------------------------
+# FALLBACK
+# -------------------------------
 def parse_with_llm_fallback(image_data: bytes) -> dict:
-    """Use LLM with vision to parse floor plan when OpenCV fails."""
-    if not GEMINI_AVAILABLE:
-        api_key = os.environ.get("GEMINI_API_KEY")
-        if not api_key:
-            raise ValueError("GEMINI_API_KEY not set and google-genai not installed")
-        genai.configure(api_key=api_key)
+    api_key = os.environ.get("GEMINI_API_KEY")
+    if not api_key:
+        raise ValueError("GEMINI_API_KEY not set")
     
+    client = genai.Client(api_key=api_key)
     image = Image.open(io.BytesIO(image_data))
     
-    prompt = """Analyze this floor plan image and extract the structure into JSON format.
-    Return a JSON object with 'rooms' and 'walls' arrays.
+    prompt = """Analyze this floor plan and extract ALL rooms.
+
+Requirements:
+- Detect ALL visible rooms (at least 4 if present)
+- Each room must have realistic dimensions (2m-10m)
+- Maintain correct spatial layout
+- Output JSON ONLY
+
+Format:
+{
+  "rooms": [
+    {"id": "...", "name": "...", "width": ..., "length": ..., "x": ..., "y": ...}
+  ]
+}
+"""
     
-    Each room should have: id, name, width, length, x, y
-    Each wall should have: id, type (load_bearing or partition), length, x1, y1, x2, y2, room_id
-    
-    Return ONLY valid JSON, no additional text."""
-    
-    model = genai.GenerativeModel('gemini-1.5-pro')
-    response = model.generate_content([prompt, image])
+    response = client.models.generate_content(
+        model='gemini-2.0-flash',
+        contents=[prompt, image]
+    )
     
     json_str = response.text.strip()
     if json_str.startswith("```json"):
@@ -211,17 +223,34 @@ def parse_with_llm_fallback(image_data: bytes) -> dict:
     if json_str.endswith("```"):
         json_str = json_str[:-3]
     
-    return json.loads(json_str.strip())
+    data = json.loads(json_str.strip())
+    if "walls" not in data:
+        data["walls"] = infer_walls_from_rooms(data["rooms"])
+        
+    return data
+
+def get_default_structure():
+    rooms = [
+        {"id": "room_1", "name": "Living Room", "width": 10, "length": 12, "x": 0, "y": 0},
+        {"id": "room_2", "name": "Bedroom", "width": 8, "length": 10, "x": 10, "y": 0},
+    ]
+    return {
+        "rooms": rooms,
+        "walls": infer_walls_from_rooms(rooms)
+    }
 
 
+# -------------------------------
+# CLI TEST
+# -------------------------------
 def parse_floor_plan_from_file(file_path: str) -> dict:
-    """Parse a floor plan from a file path."""
-    with open(file_path, 'rb') as f:
+    with open(file_path, "rb") as f:
         return parse_floor_plan(f.read())
 
 
 if __name__ == "__main__":
     import sys
+
     if len(sys.argv) > 1:
         result = parse_floor_plan_from_file(sys.argv[1])
         print(json.dumps(result, indent=2))

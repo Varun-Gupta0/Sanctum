@@ -9,8 +9,13 @@ import os
 import json
 
 try:
+    from dotenv import load_dotenv
+    load_dotenv()
+except ImportError:
+    pass
+
+try:
     import google.genai as genai
-    from google.genai import types
     GEMINI_AVAILABLE = True
 except ImportError:
     GEMINI_AVAILABLE = False
@@ -90,20 +95,17 @@ Requirements:
 3. Mention any structural concerns
 4. Keep it concise (2-3 sentences)"""
     
-    if GEMINI_AVAILABLE:
-        api_key = os.environ.get("GEMINI_API_KEY")
-        if api_key:
-            genai.configure(api_key=api_key)
-            model = genai.GenerativeModel('gemini-1.5-pro')
-            response = model.generate_content(
-                types.Content(
-                    parts=[
-                        types.Part(text=SYSTEM_PROMPT),
-                        types.Part(text=user_prompt)
-                    ]
-                )
+    api_key = os.environ.get("GEMINI_API_KEY")
+    if api_key:
+        try:
+            client = genai.Client(api_key=api_key)
+            response = client.models.generate_content(
+                model='gemini-2.0-flash',
+                contents=user_prompt
             )
             return response.text.strip()
+        except Exception as e:
+            print(f"Gemini API error: {e}")
     
     if OPENAI_AVAILABLE:
         api_key = os.environ.get("OPENAI_API_KEY")
