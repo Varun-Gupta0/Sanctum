@@ -1,0 +1,5 @@
+{"sessionId": "a37c3e", "timestamp": 1774776522457, "location": "app.py:render_rooms", "message": "pre_show", "data": {"renderer_default": "browser", "plotly_version": "6.6.0"}, "hypothesisId": "H1"}
+{"sessionId": "a37c3e", "timestamp": 1774776522457, "location": "app.py:render_rooms", "message": "webbrowser_ok", "data": {"browser_repr": "<webbrowser.WindowsDefault object at 0x00000239134C0490>"}, "hypothesisId": "H3"}
+{"sessionId": "a37c3e", "timestamp": 1774776522478, "location": "app.py:render_rooms", "message": "html_written", "data": {"path": "D:\\Projects\\IIIT\\floorplan_3d.html", "bytes": 10496}, "hypothesisId": "H4"}
+{"sessionId": "a37c3e", "timestamp": 1774776522620, "location": "app.py:render_rooms", "message": "webbrowser_open_uri", "data": {"opened": true, "uri": "file:///D:/Projects/IIIT/floorplan_3d.html"}, "hypothesisId": "H4"}
+{"sessionId": "a37c3e", "timestamp": 1774776522620, "location": "app.py:render_rooms", "message": "show_completed", "data": {"ok": true, "method": "write_html+open"}, "hypothesisId": "H2"}
