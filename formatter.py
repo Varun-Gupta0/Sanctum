@@ -33,6 +33,9 @@ def print_report(report: dict) -> None:
         wall = result.get("wall", {})
         material = result.get("material", "Unknown")
         explanation = result.get("explanation", "No explanation available.")
+        confidence = result.get("confidence", "High")
+        suggestion = result.get("suggestion", "")
+        why_not = result.get("why_not", {})
 
         wall_type = wall.get("type", "unknown")
         length = wall.get("length", 0)
@@ -40,6 +43,12 @@ def print_report(report: dict) -> None:
         print(f"\n  [WALL #{i}]  {wall_type.title():15} |  {length}m")
         print(f"  Material   : {material}")
         print(f"  Reason     : {explanation}")
+        print(f"  Confidence : {confidence}")
+        if suggestion:
+            print(f"  Suggestion : {suggestion}")
+        if why_not:
+            rejected = ", ".join(why_not.keys())
+            print(f"  Rejected   : {rejected}")
         print("-" * 60)
 
     print(f"\n  Report complete. {num_walls} walls analyzed.")

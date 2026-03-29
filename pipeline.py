@@ -11,6 +11,7 @@ from materials import recommend_material, calculate_risk_score
 from explain import explain as generate_explanation
 from formatter import print_report, write_json
 from render_rooms import render_rooms as render_3d, generate_plotly_json
+from analyze import analyze_wall
 
 
 def adapt_wall(wall: dict) -> dict:
@@ -69,33 +70,62 @@ def run_pipeline(
     rooms = data["rooms"]
     walls = data["walls"]
 
+    room_lookup = {r.get("id"): r for r in rooms}
+
     results = []
     for wall in walls:
         adapted = adapt_wall(wall)
-        
+
+        room_id = wall.get("room_id")
+        room = room_lookup.get(room_id, {})
+        if room:
+            analysis = analyze_wall(room)
+        else:
+            analysis = {
+                "room": "Unknown",
+                "span": adapted.get("length", 0),
+                "area": 0,
+                "load_bearing": adapted.get("load_bearing", False),
+                "fire_sensitive": False,
+                "confidence": "High",
+                "suggestion": "No data available",
+            }
+
         material_options = recommend_material(adapted)
-        
+
         top_material = material_options[0]["name"] if material_options else "Red Brick"
-        
+
         explanation = generate_explanation(adapted, material_options)
-        
+
         risk_score = calculate_risk_score(adapted, top_material)
-        
-        results.append({
-            "wall": wall,
-            "material": top_material,
-            "material_options": material_options,
-            "explanation": explanation,
-            "risk_score": risk_score,
-        })
-        
+
+        why_not = {}
+        if len(material_options) > 1:
+            for opt in material_options[1:]:
+                reason = f"Lower tradeoff score ({opt.get('tradeoff_score', 0)}) compared to {top_material}"
+                why_not[opt["name"]] = reason
+
+        results.append(
+            {
+                "wall": wall,
+                "material": top_material,
+                "material_options": material_options,
+                "explanation": explanation,
+                "risk_score": risk_score,
+                "confidence": analysis.get("confidence", "High"),
+                "suggestion": analysis.get("suggestion", ""),
+                "fire_sensitive": analysis.get("fire_sensitive", False),
+                "why_not": why_not,
+            }
+        )
+
     room_scores = {}
     for r in results:
         w = r["wall"]
         rid = w.get("room_id")
         if rid:
             room_scores[rid] = max(room_scores.get(rid, 0), r["risk_score"])
-            
+
     fig_json = generate_plotly_json(rooms, results)
 
     report = {
