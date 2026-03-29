@@ -86,3 +86,12 @@ This log tracks the development of the Intelligence Layer (Logic + Reasoning) fo
   - `pipeline.py`: Result dict unpacks full Y explain() output (confidence, suggestion, why_not).
   - `formatter.py`: Displays full intelligence output for judge-ready demo.
 - **Integration Test**: `python3 pipeline.py` — ✅ All 8 walls analyzed, full rich output including Why Not engine.
+
+## 🕒 [2026-03-29 17:25] — Phase 12: mayank → grvchanr Merge
+- **Task**: Pull `mayank` branch into `grvchanr`.
+- **Result**: Already up to date. `grvchanr` contains all commits from `mayank` (merged at commit `9339e25`).
+- **Commit History (grvchanr ahead by 3)**:
+  - `45d5a52` fix: X+Y integration
+  - `6beb935` fix: sync Y-Intelligence into app.py
+  - `f4bd412` feat: mayank's extensible pipeline (already present)
+- **Status**: ✅ `grvchanr` branch is fully merged and pushed.
