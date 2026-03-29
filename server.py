@@ -1,6 +1,6 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, Response
 from flask_cors import CORS
-from pipeline import run_pipeline
+from pipeline import run_pipeline, generate_phases_stream
 from vision_parser import parse_floor_plan
 import data
 
@@ -22,8 +22,7 @@ def analyze():
             if "rooms" not in req_data or "walls" not in req_data:
                 return jsonify({"error": "Missing 'rooms' or 'walls' in JSON payload"}), 400
             
-            report = run_pipeline(data_dict=req_data, render=False)
-            return jsonify(report)
+            return Response(generate_phases_stream(req_data), mimetype="application/x-ndjson")
             
         elif 'file' in request.files:
             file = request.files['file']
@@ -38,8 +37,7 @@ def analyze():
                     "walls": data.walls
                 }
             
-            report = run_pipeline(data_dict=parsed_data, render=False)
-            return jsonify(report)
+            return Response(generate_phases_stream(parsed_data), mimetype="application/x-ndjson")
             
         else:
             return jsonify({"error": "Unsupported Content-Type"}), 400

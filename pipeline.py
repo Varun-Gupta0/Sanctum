@@ -5,6 +5,8 @@ Central orchestrator for the structural intelligence system.
 
 import webbrowser
 from pathlib import Path
+import json
+import time
 
 from loader import load_data
 from materials import recommend_material, calculate_risk_score
@@ -96,14 +98,28 @@ def run_pipeline(
         if rid:
             room_scores[rid] = max(room_scores.get(rid, 0), r["risk_score"])
             
-    fig_json = generate_plotly_json(rooms, results)
+    # Generate phased Plotly JSONs
+    fig_phase_1 = generate_plotly_json(rooms, results, phase="layout")
+    fig_phase_2 = generate_plotly_json(rooms, results, phase="walls")
+    fig_phase_3 = generate_plotly_json(rooms, results, phase="analysis")
+    fig_phase_4 = generate_plotly_json(rooms, results, phase="materials")
+    fig_phase_5 = generate_plotly_json(rooms, results, phase="final")
+    
+    phases = {
+        "phase_1_layout": fig_phase_1,
+        "phase_2_walls": fig_phase_2,
+        "phase_3_analysis": fig_phase_3,
+        "phase_4_materials": fig_phase_4,
+        "phase_5_final": fig_phase_5,
+    }
 
     report = {
         "rooms": rooms,
         "walls": walls,
         "results": results,
         "room_scores": room_scores,
-        "diagram": fig_json,
+        "phases": phases,
+        "diagram": fig_phase_5,
     }
 
     print_report(report)
@@ -117,3 +133,68 @@ def run_pipeline(
 
 if __name__ == "__main__":
     run_pipeline(input_path="input.json")
+
+
+def generate_phases_stream(data_dict: dict):
+    """Generator that yields the 5 analytical phases progressively for real-time frontend streaming."""
+    rooms = data_dict.get("rooms", [])
+    walls = data_dict.get("walls", [])
+    
+    # Phase 1: Layout (Only Room Boxes)
+    fig_1 = generate_plotly_json(rooms, [], phase="layout")
+    yield json.dumps({"phase": "layout", "diagram": fig_1}) + "\n"
+    time.sleep(0.5)
+    
+    # Phase 2: Walls (Generic Walls, mapped by load_bearing)
+    pseudo_results = [{"wall": w, "risk_score": 0, "material": "Unknown"} for w in walls]
+    fig_2 = generate_plotly_json(rooms, pseudo_results, phase="walls")
+    yield json.dumps({"phase": "walls", "diagram": fig_2}) + "\n"
+    time.sleep(0.5)
+    
+    # Begin deep analysis
+    results = []
+    room_scores = {}
+    
+    for wall in walls:
+        adapted = adapt_wall(wall)
+        
+        material_options = recommend_material(adapted)
+        top_material = material_options[0]["name"] if material_options else "Red Brick"
+        explanation = generate_explanation(adapted, material_options)
+        risk_score = calculate_risk_score(adapted, top_material)
+        
+        results.append({
+            "wall": wall,
+            "material": top_material,
+            "material_options": material_options,
+            "explanation": explanation,
+            "risk_score": risk_score,
+        })
+        
+        rid = wall.get("room_id")
+        if rid:
+            room_scores[rid] = max(room_scores.get(rid, 0), risk_score)
+            
+    # Phase 3: Analysis (Apply Risk Score Coloring)
+    fig_3 = generate_plotly_json(rooms, results, phase="analysis")
+    yield json.dumps({"phase": "analysis", "diagram": fig_3}) + "\n"
+    time.sleep(0.5)
+    
+    # Phase 4: Materials (Apply Material Coloring)
+    fig_4 = generate_plotly_json(rooms, results, phase="materials")
+    yield json.dumps({"phase": "materials", "diagram": fig_4}) + "\n"
+    time.sleep(0.5)
+    
+    # Phase 5: Final (Full Model + Sidebar JSON Payload)
+    fig_5 = generate_plotly_json(rooms, results, phase="final")
+    
+    report = {
+        "phase": "final",
+        "diagram": fig_5,
+        "rooms": rooms,
+        "walls": walls,
+        "results": results,
+        "room_scores": room_scores
+    }
+    
+    yield json.dumps(report) + "\n"
