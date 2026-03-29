@@ -1,59 +1,86 @@
 """
-Material Recommendation Engine — Y (Intelligence Layer)
+Material Recommendation Engine — Y (Intelligence Layer) — Phase 2
 Part of the AI-based Structural Intelligence System.
 
-Smarter rule-based logic with prioritized multi-factor decisions.
+Multi-factor decision engine: uses span, area, load-bearing status,
+room type, and fire sensitivity. Safety first, then cost optimization.
+
 Designed to be imported by X's app.py: from materials import recommend_material
 """
 
-# ──────────────────────────────────────────────
-# RULES — evaluated top-down, first match wins.
-# To extend: just append (predicate, material).
-# ──────────────────────────────────────────────
-RULES = [
-    # Priority 1: load-bearing AND long span → strongest pick
-    (lambda w: w.get("load_bearing", False) and w.get("length", 0) > 5, "RCC"),
-    # Priority 2: load-bearing (any length) → structural safety
-    (lambda w: w.get("load_bearing", False), "RCC"),
-    # Priority 3: long span partition → needs rigid support
-    (lambda w: w.get("length", 0) > 5, "Steel Frame"),
-]
 
-DEFAULT_MATERIAL = "Red Brick"
-
-
-def recommend_material(wall: dict) -> str:
-    """Recommend the optimal construction material for a wall.
+def recommend_material(analysis: dict) -> str:
+    """Recommend construction material from enriched wall analysis.
 
     Parameters
     ----------
-    wall : dict
-        Keys: ``load_bearing`` (bool), ``length`` (float/int), etc.
+    analysis : dict
+        Output from ``analyze.analyze_wall()`` — must include:
+        ``span``, ``area``, ``load_bearing``, ``fire_sensitive``.
 
     Returns
     -------
     str
         One of ``"RCC"``, ``"Steel Frame"``, or ``"Red Brick"``.
     """
-    for predicate, material in RULES:
-        if predicate(wall):
-            return material
-    return DEFAULT_MATERIAL
+    span = analysis.get("span", 0)
+    area = analysis.get("area", 0)
+    load_bearing = analysis.get("load_bearing", False)
+    fire_sensitive = analysis.get("fire_sensitive", False)
+
+    # ── SAFETY-CRITICAL: load-bearing walls ──
+    if load_bearing and span > 10:
+        return "RCC"           # heavy span + structural load → only RCC
+    if load_bearing and span > 5:
+        return "RCC"           # moderate span + load → RCC preferred
+    if load_bearing:
+        return "RCC"           # any load-bearing → RCC for safety
+
+    # ── FIRE-SENSITIVE rooms ──
+    if fire_sensitive and span > 5:
+        return "RCC"           # fire zone + large span → RCC (non-combustible + strong)
+    if fire_sensitive:
+        return "Red Brick"     # fire zone + short span → brick (naturally fire-resistant)
+
+    # ── PARTITIONS by span ──
+    if span > 10:
+        return "Steel Frame"   # very large partition → steel rigidity
+    if span > 5:
+        return "Steel Frame"   # large partition → steel support
+
+    # ── AREA-BASED refinement ──
+    if area > 30:
+        return "Steel Frame"   # large open room even with short walls → steel stiffness
+
+    return "Red Brick"         # standard short partition → cost-effective brick
 
 
 # ──────────── standalone tests ────────────
 if __name__ == "__main__":
     tests = [
-        ({"load_bearing": True, "length": 8},  "RCC"),          # priority 1
-        ({"load_bearing": True, "length": 3},  "RCC"),          # priority 2
-        ({"load_bearing": False, "length": 7}, "Steel Frame"),  # priority 3
-        ({"load_bearing": False, "length": 3}, "Red Brick"),    # default
-        ({"load_bearing": True, "length": 6},  "RCC"),          # combo → RCC wins
-        ({},                                    "Red Brick"),    # empty wall
+        # (analysis_dict, expected_material)
+        ({"span": 12, "area": 72, "load_bearing": True, "fire_sensitive": False},  "RCC"),
+        ({"span": 6,  "area": 24, "load_bearing": True, "fire_sensitive": False},  "RCC"),
+        ({"span": 3,  "area": 12, "load_bearing": True, "fire_sensitive": False},  "RCC"),
+        ({"span": 7,  "area": 28, "load_bearing": False, "fire_sensitive": True},  "RCC"),
+        ({"span": 3,  "area": 12, "load_bearing": False, "fire_sensitive": True},  "Red Brick"),
+        ({"span": 12, "area": 48, "load_bearing": False, "fire_sensitive": False}, "Steel Frame"),
+        ({"span": 7,  "area": 28, "load_bearing": False, "fire_sensitive": False}, "Steel Frame"),
+        ({"span": 3,  "area": 36, "load_bearing": False, "fire_sensitive": False}, "Steel Frame"),
+        ({"span": 3,  "area": 12, "load_bearing": False, "fire_sensitive": False}, "Red Brick"),
     ]
-    for wall, expected in tests:
-        result = recommend_material(wall)
-        status = "✓" if result == expected else "✗"
-        print(f"  {status}  {wall!s:<45} → {result}")
-        assert result == expected, f"Expected {expected}, got {result}"
-    print("\n✅ All materials.py tests passed!")
+
+    print("materials.py — Phase 2 Multi-Factor Tests\n")
+    all_pass = True
+    for analysis, expected in tests:
+        result = recommend_material(analysis)
+        ok = result == expected
+        if not ok:
+            all_pass = False
+        status = "✓" if ok else "✗"
+        lb = "LB" if analysis["load_bearing"] else "PT"
+        fs = " 🔥" if analysis["fire_sensitive"] else ""
+        print(f"  {status}  [{lb}{fs}] span={analysis['span']}m area={analysis['area']}m² → {result}")
+
+    assert all_pass, "Some tests failed!"
+    print("\n✅ All materials.py Phase 2 tests passed!")

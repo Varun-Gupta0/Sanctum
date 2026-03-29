@@ -45,3 +45,23 @@ This log tracks the development of the Intelligence Layer (Logic + Reasoning) fo
 - **Task**: Push Team Y's intelligence logic to a collaborative branch.
 - **Goal**: Git-based synchronization between X and Y roles.
 - **Action**: Awaiting remote repository URL to link current local workspace for pushing.
+
+## 🕒 [2026-03-29 15:31] — Phase 8: GitHub Deployment Success
+- **Remote Repo**: `https://github.com/Varun-Gupta0/Sanctum.git`
+- **Branch Created**: `intelligence-y-logic`
+- **Status**: Successfully pushed code for `materials.py` (Intelligence) and `explain.py` (Reasoning) for X to integrate.
+
+## 🕒 [2026-03-29 15:33] — Phase 9: Branding/Role Clean-up
+- **Branch Renamed**: `intelligence-y-logic` → `grvchanr`
+- **Status**: Updated all remote and local pointers. Y logic is now centralized in the `grvchanr` branch.
+
+## 🕒 [2026-03-29 16:44] — Phase 10: Intelligence Upgrade (Phase 2)
+- **New Module**: `analyze.py` — Wall analysis hub (span, area, load-bearing inference, fire sensitivity, confidence scoring, design suggestions).
+- **Upgraded**: `materials.py` — Multi-factor decision engine (span + area + load-bearing + fire-sensitivity). Safety-first priority with cost optimization fallback. 9/9 tests passed.
+- **Upgraded**: `explain.py` — Structured output with "Why Not" comparative rejection engine. Returns dict with material, confidence, suggestion, explanation, and why_not map. 4/4 tests passed.
+- **Key Differentiators**:
+  - Confidence scoring (High/Medium/Low based on span)
+  - Actionable design suggestions ("Add column support", "Reinforce at mid-span")
+  - Fire-sensitivity awareness (Kitchen → fire-resistant preference)
+  - Comparative reasoning ("Why NOT brick? → lacks tensile reinforcement for load-bearing")
+- **Status**: ✅ All modules verified standalone. Ready for X integration.
