@@ -5,45 +5,29 @@ document.addEventListener('DOMContentLoaded', () => {
     const previewImage = document.getElementById('preview-image');
     const placeholder = document.getElementById('placeholder');
     const analyzeBtn = document.getElementById('btn-analyze');
-    const btnSample = document.getElementById('btn-sample');
     const btnJson = document.getElementById('btn-json');
     const btnClear = document.getElementById('btn-clear');
     const statusText = document.getElementById('status-text');
     const plotlyViewer = document.getElementById('plotly-viewer');
+    const btnToggleResults = document.getElementById('btn-toggle-results');
+    const analysisPanel = document.getElementById('analysis-panel');
 
-    // Results container
-    let resultsContainer = null;
+    // Toggle Analysis Panel
+    btnToggleResults.addEventListener('click', () => {
+        analysisPanel.classList.toggle('show');
+        btnToggleResults.classList.toggle('active');
+        
+        const isShowing = analysisPanel.classList.contains('show');
+        const span = btnToggleResults.querySelector('span:not(.material-symbols-outlined)');
+        span.textContent = isShowing ? 'Hide Data' : 'Show Data';
+    });
+
+    const analysisResults = document.getElementById('analysis-results');
+    const analysisPlaceholder = document.querySelector('.analysis-placeholder');
 
     let currentFile = null;
     let currentInputType = null; // 'image' or 'json'
 
-    // Create results container
-    function createResultsContainer() {
-        if (resultsContainer) return resultsContainer;
-        
-        resultsContainer = document.createElement('div');
-        resultsContainer.className = 'results-container';
-        resultsContainer.style.cssText = `
-            position: absolute;
-            top: 80px;
-            right: 32px;
-            width: 320px;
-            max-height: calc(100% - 160px);
-            overflow-y: auto;
-            background: rgba(31, 31, 36, 0.95);
-            backdrop-filter: blur(12px);
-            border: 1px solid var(--color-outline-variant);
-            border-radius: var(--radius-lg);
-            padding: 20px;
-            z-index: 20;
-            display: none;
-        `;
-        
-        const rightPanel = document.querySelector('.right-panel');
-        rightPanel.appendChild(resultsContainer);
-        
-        return resultsContainer;
-    }
 
     // Upload button click
     uploadBtn.addEventListener('click', (e) => {
@@ -114,66 +98,15 @@ document.addEventListener('DOMContentLoaded', () => {
         plotlyViewer.style.display = 'none';
         Plotly.purge(plotlyViewer);
         
-        if (resultsContainer) {
-            resultsContainer.style.display = 'none';
-            resultsContainer.innerHTML = '';
+        if (analysisResults) {
+            analysisResults.hidden = true;
+            analysisResults.innerHTML = '';
+        }
+        if (analysisPlaceholder) {
+            analysisPlaceholder.style.display = 'flex';
         }
     });
 
-    // Sample button - uses default data from backend
-    btnSample.addEventListener('click', async () => {
-        // Load default data (same as data.py)
-        const defaultData = {
-            rooms: [
-                { id: "room_1", name: "Living Room", width: 15, length: 18, x: 0, y: 0 },
-                { id: "room_2", name: "Kitchen", width: 12, length: 14, x: 15, y: 0 },
-                { id: "room_3", name: "Master Bedroom", width: 14, length: 16, x: 0, y: 18 },
-                { id: "room_4", name: "Bedroom 2", width: 12, length: 12, x: 14, y: 18 },
-                { id: "room_5", name: "Bathroom", width: 8, length: 10, x: 14, y: 30 },
-                { id: "room_6", name: "Hallway", width: 4, length: 12, x: 27, y: 0 }
-            ],
-            walls: [
-                { id: "w1", type: "load_bearing", length: 34, x1: 0, y1: 0, x2: 0, y2: 34, room_id: "room_1" },
-                { id: "w2", type: "load_bearing", length: 31, x1: 0, y1: 0, x2: 31, y2: 0, room_id: "room_1" },
-                { id: "w3", type: "load_bearing", length: 12, x1: 31, y1: 0, x2: 31, y2: 12, room_id: "room_6" },
-                { id: "w4", type: "load_bearing", length: 22, x1: 0, y1: 34, x2: 22, y2: 34, room_id: "room_3" },
-                { id: "w5", type: "partition", length: 14, x1: 15, y1: 0, x2: 15, y2: 14, room_id: "room_2" },
-                { id: "w6", type: "partition", length: 15, x1: 0, y1: 18, x2: 15, y2: 18, room_id: "room_1" },
-                { id: "w7", type: "partition", length: 16, x1: 14, y1: 18, x2: 14, y2: 34, room_id: "room_3" },
-                { id: "w8", type: "partition", length: 12, x1: 15, y1: 14, x2: 27, y2: 14, room_id: "room_2" }
-            ]
-        };
-        
-        currentFile = null;
-        currentInputType = 'json';
-        
-        // Show sample preview
-        const sampleSvg = `data:image/svg+xml,${encodeURIComponent(`
-            <svg xmlns="http://www.w3.org/2000/svg" width="600" height="400" viewBox="0 0 600 400">
-                <rect fill="#1f1f24" width="600" height="400"/>
-                <g stroke="#6c5ce7" stroke-width="2" fill="none">
-                    <rect x="50" y="50" width="500" height="300"/>
-                    <line x1="50" y1="150" x2="250" y2="150"/>
-                    <line x1="250" y1="50" x2="250" y2="200"/>
-                    <line x1="350" y1="200" x2="550" y2="200"/>
-                    <line x1="350" y1="200" x2="350" y2="350"/>
-                    <rect x="380" y="80" width="80" height="60"/>
-                    <rect x="80" y="180" width="60" height="50"/>
-                </g>
-                <text fill="#a5e7ff" x="300" y="380" text-anchor="middle" font-family="monospace" font-size="14">SAMPLE FLOOR PLAN</text>
-            </svg>
-        `)}`;
-        
-        previewImage.src = sampleSvg;
-        previewImage.hidden = false;
-        placeholder.style.display = 'none';
-        analyzeBtn.disabled = false;
-        
-        // Store the JSON data for analysis
-        window.pendingJsonData = defaultData;
-        
-        updateStatus('Sample layout loaded - Ready to analyze', true);
-    });
 
     // JSON button - prompt for JSON input
     btnJson.addEventListener('click', async () => {
@@ -275,15 +208,15 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     function displayResults(result) {
-        const container = createResultsContainer();
+        if (!analysisResults || !analysisPlaceholder) return;
+        
+        analysisPlaceholder.style.display = 'none';
+        analysisResults.hidden = false;
         
         let html = `
-            <div style="margin-bottom: 16px;">
-                <h3 style="font-family: var(--font-headline); font-size: 16px; font-weight: 600; color: white; margin: 0;">
-                    Analysis Results
-                </h3>
-                <p style="font-size: 12px; color: var(--color-outline); margin: 4px 0 0 0;">
-                    ${result.rooms ? result.rooms.length : 0} rooms analyzed
+            <div style="margin-bottom: 24px;">
+                <p style="font-size: 13px; color: var(--color-outline); margin: 0;">
+                    ${result.rooms ? result.rooms.length : 0} structural zones identified.
                 </p>
             </div>
         `;
@@ -293,90 +226,74 @@ document.addEventListener('DOMContentLoaded', () => {
                 const roomId = room.id;
                 const roomScore = result.room_scores ? result.room_scores[roomId] : 0;
                 
-                // Room risk styling
                 let rRisk = 'Low'; let rColor = '#00D9A5';
                 if (roomScore >= 80) { rRisk = 'High'; rColor = '#FF4757'; }
                 else if (roomScore >= 50) { rRisk = 'Medium'; rColor = '#FFB800'; }
                 else if (roomScore >= 30) { rRisk = 'Elevated'; rColor = '#FDE047'; }
                 
                 html += `
-                    <div style="background: var(--bg-surface-container); border-radius: 12px; padding: 16px; margin-bottom: 12px;">
-                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; border-bottom: 1px solid var(--color-outline-variant); padding-bottom: 8px;">
-                            <span style="font-size: 14px; font-weight: 700; color: white;">
-                                ${room.name}
-                            </span>
-                            <span style="font-size: 11px; font-weight: 700; padding: 3px 8px; border-radius: 4px; background: ${rColor}20; color: ${rColor};">
-                                ${rRisk} Risk (Score: ${roomScore})
+                    <div class="room-card">
+                        <div class="room-header">
+                            <span class="room-name">${room.name}</span>
+                            <span class="risk-badge" style="background: ${rColor}20; color: ${rColor};">
+                                ${rRisk} Risk
                             </span>
                         </div>
                 `;
                 
-                // Find walls for this room
                 const roomWalls = (result.results || []).filter(item => item.wall.room_id === roomId);
                 
                 if (roomWalls.length === 0) {
-                    html += `<p style="font-size: 12px; color: var(--color-outline);">No walls assigned.</p>`;
+                    html += `<p style="font-size: 12px; color: var(--color-outline);">No walls mapped.</p>`;
                 } else {
                     roomWalls.forEach((item, index) => {
                         const wall = item.wall;
-                        const material = item.material;
-                        const materialOptions = item.material_options || [{name: material, tradeoff_score: 0}];
-                        const explanation = item.explanation;
+                        const materialOptions = item.material_options || [];
                         const score = item.risk_score || 0;
                         
-                        let risk = 'Low'; let riskColor = '#00D9A5';
-                        if (score >= 80) { risk = 'High'; riskColor = '#FF4757'; }
-                        else if (score >= 50) { risk = 'Medium'; riskColor = '#FFB800'; }
-                        else if (score >= 30) { risk = 'Elevated'; riskColor = '#FDE047'; }
+                        let riskColor = '#00D9A5';
+                        if (score >= 80) riskColor = '#FF4757';
+                        else if (score >= 50) riskColor = '#FFB800';
+                        else if (score >= 30) riskColor = '#FDE047';
                         
-                        const optionsHtml = materialOptions.map((opt, optIdx) => {
-                            const rankBadge = optIdx === 0 ? '<span style="font-size:9px;background:#00D9A5;color:#000;padding:1px 4px;border-radius:3px;margin-right:4px;">BEST</span>' : 
-                                             optIdx === 1 ? '<span style="font-size:9px;background:#FFB800;color:#000;padding:1px 4px;border-radius:3px;margin-right:4px;">2nd</span>' :
-                                             '<span style="font-size:9px;background:#6c5ce7;color:#fff;padding:1px 4px;border-radius:3px;margin-right:4px;">3rd</span>';
+                        const optionsHtml = materialOptions.slice(0, 3).map((opt, optIdx) => {
+                            const rankClass = optIdx === 0 ? 'BEST' : optIdx === 1 ? '2nd' : '3rd';
+                            const rankColor = optIdx === 0 ? '#00D9A5' : optIdx === 1 ? '#FFB800' : '#6c5ce7';
+                            
                             return `
-                                <div style="display: flex; justify-content: space-between; align-items: center; padding: 6px 8px; background: ${optIdx === 0 ? 'rgba(0,217,165,0.1)' : 'rgba(255,255,255,0.03)'}; border-radius: 6px; margin-bottom: 4px;">
+                                <div class="material-chip">
                                     <div>
-                                        ${rankBadge}
-                                        <span style="font-size: 12px; font-weight: 600; color: ${optIdx === 0 ? '#00D9A5' : 'white'};">${opt.name}</span>
+                                        <span class="chip-rank" style="background: ${rankColor}; color: ${optIdx === 2 ? '#fff' : '#000'};">${rankClass}</span>
+                                        <span class="chip-name" style="color: ${optIdx === 0 ? '#00D9A5' : 'white'};">${opt.name}</span>
                                     </div>
-                                    <span style="font-size: 10px; color: var(--color-outline);">Score: ${opt.tradeoff_score || '-'}</span>
+                                    <span style="font-size: 10px; color: var(--color-outline);">${opt.tradeoff_score || '-'}</span>
                                 </div>
                             `;
                         }).join('');
                         
                         html += `
-                            <div style="margin-bottom: 16px; padding-left: 8px; border-left: 2px solid ${riskColor}50;">
-                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-                                    <span style="font-size: 12px; font-weight: 600; color: var(--color-primary-container);">
-                                        Wall ${wall.id || index + 1} (${wall.type})
-                                    </span>
-                                    <span style="font-size: 10px; font-weight: 600; color: ${riskColor};">
-                                        Score: ${score}
-                                    </span>
+                            <div class="wall-item" style="border-left-color: ${riskColor}50;">
+                                <div class="wall-header">
+                                    <span class="wall-name">Wall ${wall.id || index + 1}</span>
+                                    <span class="wall-score">Score: ${score}</span>
                                 </div>
                                 
-                                <div style="margin-bottom: 8px;">
-                                    <span style="font-size: 10px; color: var(--color-outline); text-transform: uppercase;">Recommended Materials:</span>
-                                    <div style="margin-top: 6px;">
-                                        ${optionsHtml}
-                                    </div>
+                                <div style="margin-top: 8px;">
+                                    ${optionsHtml}
                                 </div>
                                 
-                                <div>
-                                    <p style="font-size: 12px; color: var(--color-on-surface-variant); margin: 0; line-height: 1.4;">${explanation}</p>
-                                </div>
+                                <p class="wall-exp">${item.explanation}</p>
                             </div>
                         `;
                     });
                 }
-                html += `</div>`; // Close room container
+                html += `</div>`;
             });
         } else {
-            html += `<p style="color: var(--color-outline);">No structural data mapped.</p>`;
+            html += `<p style="color: var(--color-outline);">No data available.</p>`;
         }
         
-        container.innerHTML = html;
-        container.style.display = 'block';
+        analysisResults.innerHTML = html;
     }
 
     function updateStatus(text, ready) {

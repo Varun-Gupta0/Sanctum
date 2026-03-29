@@ -3,6 +3,8 @@ Data Loader — X (Structure + Pipeline Layer)
 Loads room/wall data from JSON or falls back to data.py defaults.
 """
 
+from __future__ import annotations
+
 import json
 from pathlib import Path
 

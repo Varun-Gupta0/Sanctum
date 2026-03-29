@@ -1,7 +1,7 @@
-# SANCTUM AI - Project Context for AI
+# PLANWISE AI - Project Context for AI
 
 ## Project Overview
-**SANCTUM AI Structural Intelligence System** - An AI-based system that converts floor plan data into 3D structural models, recommends construction materials, and provides engineering explanations.
+**PLANWISE AI Structural Intelligence System** - An AI-based system that converts floor plan data into 3D structural models, recommends construction materials, and provides engineering explanations.
 
 ---
 
@@ -97,7 +97,7 @@ Open `frontend/index.html` in browser
 
 ## Project Structure
 ```
-Sanctum-1/
+PlanWise-1/
 ├── data.py           # Room/wall definitions
 ├── materials.py      # Material logic
 ├── explain.py        # Explanation generator

@@ -3,6 +3,8 @@ Output Formatter — X (Structure + Pipeline Layer)
 Console display and JSON output for the structural intelligence report.
 """
 
+from __future__ import annotations
+
 import json
 from pathlib import Path
 
@@ -24,7 +26,7 @@ def print_report(report: dict) -> None:
 
     print()
     print("=" * 60)
-    print("  SANCTUM — Structural Intelligence Report")
+    print("  PLANWISE — Structural Intelligence Report")
     print("=" * 60)
     print(f"\n  House Layout: {num_rooms} rooms, {num_walls} walls")
     print("-" * 60)

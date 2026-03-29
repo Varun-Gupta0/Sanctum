@@ -1,4 +1,4 @@
-"""SANCTUM — AI Structural Intelligence System (Entry Point)"""
+"""PLANWISE — AI Structural Intelligence System (Entry Point)"""
 
 import sys
 from pipeline import run_pipeline

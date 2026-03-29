@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SANCTUM AI - Structural Intelligence System</title>
+    <title>PLANWISE AI - Structural Intelligence System</title>
     <link rel="stylesheet" href="style.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -16,7 +16,7 @@
         <div class="topbar-left">
             <div class="logo">
                 <span class="material-symbols-outlined logo-icon">architecture</span>
-                <span class="logo-text">SANCTUM</span>
+                <span class="logo-text">PLANWISE</span>
             </div>
             <nav class="nav-tabs">
                 <a class="nav-tab active" href="#">Dashboard</a>
@@ -25,6 +25,10 @@
             </nav>
         </div>
         <div class="topbar-right">
+            <button class="toggle-btn" id="btn-toggle-results">
+                <span class="material-symbols-outlined">analytics</span>
+                <span>Show Data</span>
+            </button>
             <button class="icon-btn">
                 <span class="material-symbols-outlined">notifications</span>
             </button>
@@ -63,13 +67,6 @@
                     Quick Actions
                 </h2>
                 <div class="action-grid">
-                    <button class="action-card" id="btn-sample">
-                        <span class="material-symbols-outlined action-icon">map</span>
-                        <div class="action-info">
-                            <p class="action-title">Use Sample Layout</p>
-                            <p class="action-desc">Industrial Complex A-1</p>
-                        </div>
-                    </button>
                     <button class="action-card" id="btn-json">
                         <span class="material-symbols-outlined action-icon">data_object</span>
                         <div class="action-info">
@@ -144,6 +141,21 @@
                 <p class="corner-label">Coordinate System</p>
                 <p class="corner-sublabel">WGS84 / EPSG:3857</p>
             </div>
+        <!-- Right Panel - Analysis Results -->
+        <section class="analysis-panel" id="analysis-panel">
+            <div class="analysis-header">
+                <h2 class="analysis-title">Structural Analysis</h2>
+                <div class="analysis-badge">Real-time</div>
+            </div>
+            
+            <div class="analysis-placeholder">
+                <span class="material-symbols-outlined placeholder-icon">analytics</span>
+                <p>Run analysis to view structural data and material optimization recommendations.</p>
+            </div>
+            
+            <div class="analysis-results" id="analysis-results" hidden>
+                <!-- Dynamically populated by app.js -->
+            </div>
         </section>
     </main>
 
@@ -166,7 +178,7 @@
         <div class="status-right">
             <span class="status-item">
                 <span class="material-symbols-outlined">memory</span>
-                SANCTUM v1.0
+                PLANWISE v1.0
             </span>
         </div>
     </footer>

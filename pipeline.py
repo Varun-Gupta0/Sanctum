@@ -3,6 +3,8 @@ Pipeline Core — X (Structure + Pipeline Layer)
 Central orchestrator for the structural intelligence system.
 """
 
+from __future__ import annotations
+
 import webbrowser
 from pathlib import Path
 
