@@ -74,3 +74,15 @@ This log tracks the development of the Intelligence Layer (Logic + Reasoning) fo
     - Standardized data flow: \`data.py\` → \`analyze.py\` → \`materials.py\` → \`explain.py\` → \`app.py\` Visualization.
     - Verified \`output.json\` generation (Phase 2 core goal).
 - **Result**: System now detects critical structural risks (e.g., Living Room 18m span) and suggests reinforcements automatically.
+
+## 🕒 [2026-03-29 17:18] — Phase 11: X+Y Integration Fix
+- **Issues Found**:
+  1. Python 3.9 incompatibility: `str | None` type hints in `loader.py` and `pipeline.py` (requires 3.10+). Fixed using `Optional[str]` from `typing`.
+  2. Data contract mismatch: `pipeline.py` was passing bare `{load_bearing, length}` dict. Y's Phase 2 `materials.py` and `explain.py` expect full `analyze_wall()` enriched dict.
+  3. `formatter.py` was only rendering `explanation` string — missing `confidence`, `suggestion`, `why_not`.
+- **Fixes Applied**:
+  - `loader.py`: `Optional[str]` import added.
+  - `pipeline.py`: `adapt_wall()` now routes through `analyze_wall()` as the integration bridge.
+  - `pipeline.py`: Result dict unpacks full Y explain() output (confidence, suggestion, why_not).
+  - `formatter.py`: Displays full intelligence output for judge-ready demo.
+- **Integration Test**: `python3 pipeline.py` — ✅ All 8 walls analyzed, full rich output including Why Not engine.
