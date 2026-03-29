@@ -9,6 +9,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const btnJson = document.getElementById('btn-json');
     const btnClear = document.getElementById('btn-clear');
     const statusText = document.getElementById('status-text');
+    const plotlyViewer = document.getElementById('plotly-viewer');
 
     // Results container
     let resultsContainer = null;
@@ -110,6 +111,9 @@ document.addEventListener('DOMContentLoaded', () => {
         fileInput.value = '';
         updateStatus('Ready', true);
         
+        plotlyViewer.style.display = 'none';
+        Plotly.purge(plotlyViewer);
+        
         if (resultsContainer) {
             resultsContainer.style.display = 'none';
             resultsContainer.innerHTML = '';
@@ -121,17 +125,22 @@ document.addEventListener('DOMContentLoaded', () => {
         // Load default data (same as data.py)
         const defaultData = {
             rooms: [
-                { name: "Living Room", x: 0, y: 0, width: 6, length: 5 },
-                { name: "Kitchen", x: 6, y: 0, width: 4, length: 5 },
-                { name: "Bedroom", x: 0, y: 5, width: 5, length: 4 },
-                { name: "Bathroom", x: 5, y: 5, width: 3, length: 4 }
+                { id: "room_1", name: "Living Room", width: 15, length: 18, x: 0, y: 0 },
+                { id: "room_2", name: "Kitchen", width: 12, length: 14, x: 15, y: 0 },
+                { id: "room_3", name: "Master Bedroom", width: 14, length: 16, x: 0, y: 18 },
+                { id: "room_4", name: "Bedroom 2", width: 12, length: 12, x: 14, y: 18 },
+                { id: "room_5", name: "Bathroom", width: 8, length: 10, x: 14, y: 30 },
+                { id: "room_6", name: "Hallway", width: 4, length: 12, x: 27, y: 0 }
             ],
             walls: [
-                { type: "load_bearing", length: 31 },
-                { type: "partition", length: 18 },
-                { type: "load_bearing", length: 22 },
-                { type: "partition", length: 14 },
-                { type: "partition", length: 9 }
+                { id: "w1", type: "load_bearing", length: 34, x1: 0, y1: 0, x2: 0, y2: 34, room_id: "room_1" },
+                { id: "w2", type: "load_bearing", length: 31, x1: 0, y1: 0, x2: 31, y2: 0, room_id: "room_1" },
+                { id: "w3", type: "load_bearing", length: 12, x1: 31, y1: 0, x2: 31, y2: 12, room_id: "room_6" },
+                { id: "w4", type: "load_bearing", length: 22, x1: 0, y1: 34, x2: 22, y2: 34, room_id: "room_3" },
+                { id: "w5", type: "partition", length: 14, x1: 15, y1: 0, x2: 15, y2: 14, room_id: "room_2" },
+                { id: "w6", type: "partition", length: 15, x1: 0, y1: 18, x2: 15, y2: 18, room_id: "room_1" },
+                { id: "w7", type: "partition", length: 16, x1: 14, y1: 18, x2: 14, y2: 34, room_id: "room_3" },
+                { id: "w8", type: "partition", length: 12, x1: 15, y1: 14, x2: 27, y2: 14, room_id: "room_2" }
             ]
         };
         
@@ -241,6 +250,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const result = await response.json();
             
+            // Render 3D Plotly if present
+            if (result.diagram) {
+                const fig = JSON.parse(result.diagram);
+                previewImage.hidden = true;
+                plotlyViewer.style.display = 'block';
+                Plotly.newPlot('plotly-viewer', fig.data, fig.layout, {responsive: true});
+            }
+            
             // Display results
             displayResults(result);
             
@@ -266,84 +283,80 @@ document.addEventListener('DOMContentLoaded', () => {
                     Analysis Results
                 </h3>
                 <p style="font-size: 12px; color: var(--color-outline); margin: 4px 0 0 0;">
-                    ${result.results ? result.results.length : 0} walls analyzed
+                    ${result.rooms ? result.rooms.length : 0} rooms analyzed
                 </p>
             </div>
         `;
         
-        if (result.results && result.results.length > 0) {
-            result.results.forEach((item, index) => {
-                const wall = item.wall;
-                const material = item.material;
-                const explanation = item.explanation;
+        if (result.rooms && result.rooms.length > 0) {
+            result.rooms.forEach((room) => {
+                const roomId = room.id;
+                const roomScore = result.room_scores ? result.room_scores[roomId] : 0;
                 
-                // Determine risk level based on material/wall type
-                let risk = 'Low';
-                let riskColor = '#00D9A5';
-                
-                if (wall.type === 'load_bearing') {
-                    risk = 'High';
-                    riskColor = '#FF4757';
-                } else if (wall.length > 20) {
-                    risk = 'Medium';
-                    riskColor = '#FFB800';
-                }
-                
-                // Confidence score (mock for now)
-                const confidence = Math.floor(75 + Math.random() * 20);
-                
-                // Suggestion based on material
-                let suggestion = '';
-                switch(material) {
-                    case 'RCC':
-                        suggestion = 'Use reinforced concrete columns';
-                        break;
-                    case 'Steel':
-                        suggestion = 'Consider steel frame reinforcement';
-                        break;
-                    case 'Brick':
-                        suggestion = 'Standard brick masonry sufficient';
-                        break;
-                    default:
-                        suggestion = 'Consult structural engineer';
-                }
+                // Room risk styling
+                let rRisk = 'Low'; let rColor = '#00D9A5';
+                if (roomScore >= 80) { rRisk = 'High'; rColor = '#FF4757'; }
+                else if (roomScore >= 50) { rRisk = 'Medium'; rColor = '#FFB800'; }
+                else if (roomScore >= 30) { rRisk = 'Elevated'; rColor = '#FDE047'; }
                 
                 html += `
                     <div style="background: var(--bg-surface-container); border-radius: 12px; padding: 16px; margin-bottom: 12px;">
-                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-                            <span style="font-size: 12px; font-weight: 600; color: var(--color-primary-container);">
-                                Wall ${index + 1}
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; border-bottom: 1px solid var(--color-outline-variant); padding-bottom: 8px;">
+                            <span style="font-size: 14px; font-weight: 700; color: white;">
+                                ${room.name}
                             </span>
-                            <span style="font-size: 10px; font-weight: 600; padding: 2px 8px; border-radius: 4px; background: ${riskColor}20; color: ${riskColor};">
-                                ${risk} Risk
+                            <span style="font-size: 11px; font-weight: 700; padding: 3px 8px; border-radius: 4px; background: ${rColor}20; color: ${rColor};">
+                                ${rRisk} Risk (Score: ${roomScore})
                             </span>
                         </div>
-                        
-                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 12px;">
-                            <div>
-                                <p style="font-size: 10px; color: var(--color-outline); text-transform: uppercase; letter-spacing: 0.05em; margin: 0;">Material</p>
-                                <p style="font-size: 14px; font-weight: 600; color: white; margin: 2px 0 0 0;">${material}</p>
-                            </div>
-                            <div>
-                                <p style="font-size: 10px; color: var(--color-outline); text-transform: uppercase; letter-spacing: 0.05em; margin: 0;">Confidence</p>
-                                <p style="font-size: 14px; font-weight: 600; color: white; margin: 2px 0 0 0;">${confidence}%</p>
-                            </div>
-                        </div>
-                        
-                        <div style="margin-bottom: 12px;">
-                            <p style="font-size: 10px; color: var(--color-outline); text-transform: uppercase; letter-spacing: 0.05em; margin: 0;">Suggestion</p>
-                            <p style="font-size: 13px; color: var(--color-secondary); margin: 4px 0 0 0;">${suggestion}</p>
-                        </div>
-                        
-                        <div>
-                            <p style="font-size: 10px; color: var(--color-outline); text-transform: uppercase; letter-spacing: 0.05em; margin: 0;">Explanation</p>
-                            <p style="font-size: 12px; color: var(--color-on-surface-variant); margin: 4px 0 0 0; line-height: 1.5;">${explanation}</p>
-                        </div>
-                    </div>
                 `;
+                
+                // Find walls for this room
+                const roomWalls = (result.results || []).filter(item => item.wall.room_id === roomId);
+                
+                if (roomWalls.length === 0) {
+                    html += `<p style="font-size: 12px; color: var(--color-outline);">No walls assigned.</p>`;
+                } else {
+                    roomWalls.forEach((item, index) => {
+                        const wall = item.wall;
+                        const material = item.material;
+                        const explanation = item.explanation;
+                        const score = item.risk_score || 0;
+                        
+                        let risk = 'Low'; let riskColor = '#00D9A5';
+                        if (score >= 80) { risk = 'High'; riskColor = '#FF4757'; }
+                        else if (score >= 50) { risk = 'Medium'; riskColor = '#FFB800'; }
+                        else if (score >= 30) { risk = 'Elevated'; riskColor = '#FDE047'; }
+                        
+                        html += `
+                            <div style="margin-bottom: 16px; padding-left: 8px; border-left: 2px solid ${riskColor}50;">
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                                    <span style="font-size: 12px; font-weight: 600; color: var(--color-primary-container);">
+                                        Wall ${wall.id || index + 1} (${wall.type})
+                                    </span>
+                                    <span style="font-size: 10px; font-weight: 600; color: ${riskColor};">
+                                        Score: ${score}
+                                    </span>
+                                </div>
+                                
+                                <div style="display: grid; grid-template-columns: 1fr; gap: 4px; margin-bottom: 8px;">
+                                    <div>
+                                        <span style="font-size: 10px; color: var(--color-outline); text-transform: uppercase;">Material:</span>
+                                        <span style="font-size: 12px; font-weight: 600; color: white;">${material}</span>
+                                    </div>
+                                </div>
+                                
+                                <div>
+                                    <p style="font-size: 12px; color: var(--color-on-surface-variant); margin: 0; line-height: 1.4;">${explanation}</p>
+                                </div>
+                            </div>
+                        `;
+                    });
+                }
+                html += `</div>`; // Close room container
             });
         } else {
-            html += `<p style="color: var(--color-outline);">No results to display</p>`;
+            html += `<p style="color: var(--color-outline);">No structural data mapped.</p>`;
         }
         
         container.innerHTML = html;

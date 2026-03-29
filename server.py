@@ -1,78 +1,47 @@
-"""
-Flask API Server for SANCTUM
-"""
-
-import json
-import tempfile
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 from pipeline import run_pipeline
+import data  # to use default layout for image uploads
 
 app = Flask(__name__)
+# Enable CORS so the frontend at port 8000 can communicate with port 5000
 CORS(app)
-
 
 @app.route('/analyze', methods=['POST'])
 def analyze():
-    """Analyze floor plan - handles both image and JSON input."""
-    
-    content_type = request.content_type or ""
-    
-    # Case 1: Image upload (FormData)
-    if "multipart/form-data" in content_type:
-        if 'file' not in request.files:
-            return jsonify({"error": "No file provided"}), 400
-        
-        file = request.files['file']
-        if file.filename == '':
-            return jsonify({"error": "Empty filename"}), 400
-        
-        # Save to temp file and run pipeline
-        with tempfile.NamedTemporaryFile(delete=False, suffix='.png') as tmp:
-            file.save(tmp.name)
-            tmp_path = tmp.name
-        
-        try:
-            result = run_pipeline(input_path=tmp_path, render=False)
-            return jsonify(result)
-        except Exception as e:
-            return jsonify({"error": str(e)}), 500
-    
-    # Case 2: JSON input
-    elif "application/json" in content_type:
-        try:
-            data = request.get_json()
+    try:
+        if request.is_json:
+            # Handle JSON payload
+            req_data = request.get_json()
+            if "rooms" not in req_data or "walls" not in req_data:
+                return jsonify({"error": "Missing 'rooms' or 'walls' in JSON payload"}), 400
             
-            # Validate required keys
-            if 'rooms' not in data or 'walls' not in data:
-                return jsonify({
-                    "error": "JSON must contain 'rooms' and 'walls' keys"
-                }), 400
+            # Run pipeline without rendering 3D view (since it's a server)
+            report = run_pipeline(data_dict=req_data, render=False)
             
-            # Write to temp file for pipeline
-            with tempfile.NamedTemporaryFile(mode='w', delete=False, suffix='.json') as tmp:
-                json.dump(data, tmp)
-                tmp_path = tmp.name
+            return jsonify(report)
             
-            try:
-                result = run_pipeline(input_path=tmp_path, render=False)
-                return jsonify(result)
-            except Exception as e:
-                return jsonify({"error": str(e)}), 500
-                
-        except json.JSONDecodeError:
-            return jsonify({"error": "Invalid JSON"}), 400
-    
-    # Unsupported content type
-    return jsonify({
-        "error": "Content-Type must be multipart/form-data or application/json"
-    }), 400
-
-
-@app.route('/health', methods=['GET'])
-def health():
-    return jsonify({"status": "ok"})
-
+        elif 'file' in request.files:
+            # Handle Image payload (mock OpenCV processing)
+            # Future: add OpenCV logic here
+            # For now, we simulate parsing and return default data.py values
+            
+            mock_data = {
+                "rooms": data.rooms,
+                "walls": data.walls
+            }
+            
+            report = run_pipeline(data_dict=mock_data, render=False)
+            return jsonify(report)
+            
+        else:
+            return jsonify({"error": "Unsupported Content-Type"}), 400
+            
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        return jsonify({"error": str(e)}), 500
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000, debug=True)
+    print("Starting SANCTUM Backend Server on port 5000...")
+    app.run(port=5000, debug=True)

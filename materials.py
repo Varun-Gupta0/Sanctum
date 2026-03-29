@@ -41,6 +41,32 @@ def recommend_material(wall: dict) -> str:
     return DEFAULT_MATERIAL
 
 
+def calculate_risk_score(wall: dict, material: str) -> int:
+    """Calculate a 0-100 risk score for a wall based on properties & material."""
+    score = 10
+    length = wall.get("length", 0)
+    
+    # Length increases structural stress (capped at +40 to score)
+    score += min(length * 2, 40)
+    
+    if wall.get("load_bearing", False):
+        score += 40 # inherently riskier if it bears load
+        if material == "RCC":
+            score -= 20 # RCC mitigates load-bearing risk heavily
+        elif material == "Steel Frame":
+            score -= 10
+    else:
+        score += 10 # partition base risk
+        if material == "Steel Frame":
+            score -= 10
+        elif material == "RCC":
+            score -= 10
+            
+    # Cap between 0 and 100
+    return max(0, min(int(score), 100))
+
+
+
 # ──────────── standalone tests ────────────
 if __name__ == "__main__":
     tests = [

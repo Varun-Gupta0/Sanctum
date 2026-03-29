@@ -1,0 +1,1057 @@
+
+--- Page 1 ---
+HACKATHON
+Problem Statement Compendium
+ 
+ 
+ AI/ML Track
+ DevOps × AI/ML Track
+ Duration: 36 Hours | Two Independent Tracks | 100 Marks Each
+ 
+PS 1 · DevOps × AI/ML
+K8sWhisperer
+Difficulty: ■ ■ ■ ■ ■
+PS 2 · AI/ML
+Autonomous Structural Intelligence
+System
+Difficulty: ■ ■ ■
+ An optional Web3 / Blockchain bonus of 25 marks is available in both tracks.
+ 2026
+--- Page 2 ---
+PS 1 · DevOps × AI/ML Track
+ 
+K8sWhisperer
+Kubernetes Autopilot Agent
+Track
+DevOps × Artificial Intelligence / Machine Learning
+Duration
+36 Hours (continuous)
+Team Size
+2 – 4 members
+Difficulty
+■ ■ ■ ■ ■ Extreme — Full pipeline required
+Core Stack
+LangGraph · LangChain · MCP Server · kubectl · Prometheus · Slack
+"When production breaks at 3am, engineers spend 40 minutes grepping logs.
+ K8sWhisperer does it in 90 seconds — autonomously."
+ 
+The Problem
+Modern Kubernetes clusters are complex, dynamic, and unforgiving. When a production pod crashes, an on-call
+engineer receives a PagerDuty alert, SSHes into the cluster, reads logs, cross-references metrics, hypothesises
+root causes, and executes a fix — a process taking 30–60 minutes of high-stress manual work, even for
+experienced engineers.
+The tools to automate every individual step already exist: kubectl reads cluster state, Prometheus tracks
+metrics, LangGraph orchestrates multi-step agent logic, and MCP servers expose tools to LLMs. The challenge
+is integrating all of these into a coherent, safe, and explainable autonomous system — one that acts confidently
+when safe, escalates when uncertain, and never destroys what it is trying to protect.
+Goal
+Build K8sWhisperer — an autonomous Kubernetes incident response agent that continuously monitors
+a cluster, detects anomalies, diagnoses root causes, plans remediation actions, and executes fixes —
+while routing risky actions through a human-in-the-loop approval flow. Every decision must be logged in
+plain English.
+Mandatory Pipeline — 7 Stages
+01
+Observe — Cluster
+scan
+kubectl MCP polls all namespaces every 30 seconds — events, pod
+phases, resource metrics, node states — and normalises into structured
+ClusterState.
+02
+Detect — Anomaly
+classification
+LLM classifier reads the raw event stream and outputs typed Anomaly
+objects with type, severity, affected_resource, and confidence score (0–1).
+
+--- Page 3 ---
+03
+Diagnose — Root
+cause analysis
+Specialist sub-agent fetches kubectl logs, kubectl describe, and recent
+events for the affected pod. LLM synthesises a root cause string with
+evidence.
+04
+Plan — Remediation
+proposal
+Planner node proposes a RemediationPlan: action type, target resource,
+parameters, confidence score, and blast_radius classification (low /
+medium / high).
+05
+Safety Gate —
+Risk-based routing
+Conditional LangGraph edge: confidence > 0.8 AND blast_radius = low
+AND action not in DESTRUCTIVE_ACTIONS → auto-execute. Otherwise
+→ HITL Slack approval.
+06
+Execute — Surgical
+kubectl action
+kubectl MCP runs the approved action. Waits 30 seconds. Re-fetches pod
+state to confirm resolution. Sets result field in ClusterState.
+07
+Explain & Log — Audit
+trail
+LLM writes a human-readable action summary. Posts structured Slack
+message. Appends LogEntry to persistent audit_log JSON. Loops back to
+Observe.
+LangGraph State Schema
+All agent nodes read from and write to a shared ClusterState TypedDict. Nodes must not maintain local state
+— all data flows through the graph state.
+Paragraph(
+'caseSensitive':
+1 'encoding':
+'utf8' 'text':
+'Field' 'frags': [P
+araFrag(__tag_
+_='para',
+bold=1, fontNa
+me='Helvetica-
+Bold',
+fontSize=9,
+greek=0,
+italic=0, link=[],
+rise=0,
+text='Field', text
+Color=Color(1,1
+,1,1),
+us_lines=[])]
+'style':
+'bulletText':
+None 'debug': 0
+) #Paragraph
+Paragraph(
+'caseSensitive': 1
+'encoding': 'utf8'
+'text': 'Type' 'frags': 
+[ParaFrag(__tag__
+='para', bold=1, fon
+tName='Helvetica-
+Bold', fontSize=9,
+greek=0, italic=0,
+link=[], rise=0,
+text='Type', textCol
+or=Color(1,1,1,1),
+us_lines=[])]
+'style': 'bulletText':
+None 'debug': 0 )
+#Paragraph
+Paragraph( 'caseSensitive': 1 'encoding': 'utf8' 'text': 'Description'
+ 'frags': [ParaFrag(__tag__='para', bold=1,
+ fontName='Helvetica-Bold', fontSize=9, greek=0, italic=0, link=[],
+rise=0, text='Description', textColor=Color(1,1,1,1), us_lines=[])]
+'style': 'bulletText': None 'debug': 0 ) #Paragraph
+
+--- Page 4 ---
+Paragraph(
+'caseSensitive': 1
+'encoding': 'utf8'
+'text': 'events'
+'frags': [ParaFrag
+(__tag__='para',
+bold=0, fontNam
+e='Helvetica',
+fontSize=9,
+greek=0, italic=0,
+link=[], rise=0,
+text='events', tex
+tColor=Color(0,0,
+0,1),
+us_lines=[])]
+'style':
+'bulletText': None
+'debug': 0 )
+#Paragraph
+Paragraph(
+'caseSensitive': 1
+'encoding': 'utf8'
+'text': 'list[dict]'
+'frags': [ParaFrag(__
+tag__='para',
+bold=0, fontName='
+Helvetica',
+fontSize=9, greek=0,
+italic=0, link=[],
+rise=0,
+text='list[dict]', textC
+olor=Color(0,0,0,1),
+us_lines=[])] 'style':
+'bulletText': None
+'debug': 0 )
+#Paragraph
+Paragraph( 'caseSensitive': 1 'encoding': 'utf8' 'text': 'Raw kubectl
+events from the current observe cycle' 'frags':
+[ParaFrag(__tag__='para', bold=0, fontName='Helvetica', fontSize=9,
+greek=0, italic=0, link=[], rise=0, text='Raw kubectl events from the
+current observe cycle', textColor=Color(0,0,0,1), us_lines=[])] 'style':
+'bulletText': None 'debug': 0 ) #Paragraph
+Paragraph(
+'caseSensitive': 1
+'encoding': 'utf8'
+'text': 'anomalies'
+'frags': [ParaFrag
+(__tag__='para',
+bold=0, fontNam
+e='Helvetica',
+fontSize=9,
+greek=0, italic=0,
+link=[], rise=0,
+text='anomalies', 
+textColor=Color(
+0,0,0,1),
+us_lines=[])]
+'style':
+'bulletText': None
+'debug': 0 )
+#Paragraph
+Paragraph(
+'caseSensitive': 1
+'encoding': 'utf8'
+'text': 'list[Anomaly]'
+'frags': [ParaFrag(__
+tag__='para',
+bold=0, fontName='
+Helvetica',
+fontSize=9, greek=0,
+italic=0, link=[],
+rise=0,
+text='list[Anomaly]', t
+extColor=Color(0,0,
+0,1), us_lines=[])]
+'style': 'bulletText':
+None 'debug': 0 )
+#Paragraph
+Paragraph( 'caseSensitive': 1 'encoding': 'utf8' 'text': 'Detected
+anomalies with type, severity, resource, confidence' 'frags':
+[ParaFrag(__tag__='para', bold=0, fontName='Helvetica', fontSize=9,
+greek=0, italic=0, link=[], rise=0, text='Detected anomalies with type,
+severity, resource, confidence', textColor=Color(0,0,0,1), us_lines=[])]
+'style': 'bulletText': None 'debug': 0 ) #Paragraph
+
+--- Page 5 ---
+Paragraph(
+'caseSensitive': 1
+'encoding': 'utf8'
+'text': 'diagnosis'
+'frags': [ParaFrag
+(__tag__='para',
+bold=0, fontNam
+e='Helvetica',
+fontSize=9,
+greek=0, italic=0,
+link=[], rise=0,
+text='diagnosis', t
+extColor=Color(0
+,0,0,1),
+us_lines=[])]
+'style':
+'bulletText': None
+'debug': 0 )
+#Paragraph
+Paragraph(
+'caseSensitive': 1
+'encoding': 'utf8'
+'text': 'str' 'frags': [Pa
+raFrag(__tag__='par
+a', bold=0, fontName
+='Helvetica',
+fontSize=9, greek=0,
+italic=0, link=[],
+rise=0, text='str', text
+Color=Color(0,0,0,1)
+, us_lines=[])] 'style':
+'bulletText': None
+'debug': 0 )
+#Paragraph
+Paragraph( 'caseSensitive': 1 'encoding': 'utf8' 'text': 'LLM-generated
+root cause string with supporting evidence' 'frags':
+[ParaFrag(__tag__='para', bold=0, fontName='Helvetica', fontSize=9,
+greek=0, italic=0, link=[], rise=0, text='LLM-generated root cause string
+with supporting evidence', textColor=Color(0,0,0,1), us_lines=[])]
+'style': 'bulletText': None 'debug': 0 ) #Paragraph
+Paragraph(
+'caseSensitive': 1
+'encoding': 'utf8'
+'text': 'plan'
+'frags': [ParaFrag
+(__tag__='para',
+bold=0, fontNam
+e='Helvetica',
+fontSize=9,
+greek=0, italic=0,
+link=[], rise=0,
+text='plan', textC
+olor=Color(0,0,0,
+1), us_lines=[])]
+'style':
+'bulletText': None
+'debug': 0 )
+#Paragraph
+Paragraph(
+'caseSensitive': 1
+'encoding': 'utf8'
+'text':
+'RemediationPlan'
+'frags': [ParaFrag(__
+tag__='para',
+bold=0, fontName='
+Helvetica',
+fontSize=9, greek=0,
+italic=0, link=[],
+rise=0, text='Remedi
+ationPlan', textColor
+=Color(0,0,0,1),
+us_lines=[])] 'style':
+'bulletText': None
+'debug': 0 )
+#Paragraph
+Paragraph( 'caseSensitive': 1 'encoding': 'utf8' 'text': 'Proposed action,
+target, params, confidence, blast_radius' 'frags':
+[ParaFrag(__tag__='para', bold=0, fontName='Helvetica', fontSize=9,
+greek=0, italic=0, link=[], rise=0, text='Proposed action, target, params,
+confidence, blast_radius', textColor=Color(0,0,0,1), us_lines=[])] 'style':
+'bulletText': None 'debug': 0 ) #Paragraph
+
+--- Page 6 ---
+Paragraph(
+'caseSensitive': 1
+'encoding': 'utf8'
+'text': 'approved'
+'frags': [ParaFrag
+(__tag__='para',
+bold=0, fontNam
+e='Helvetica',
+fontSize=9,
+greek=0, italic=0,
+link=[], rise=0,
+text='approved', t
+extColor=Color(0
+,0,0,1),
+us_lines=[])]
+'style':
+'bulletText': None
+'debug': 0 )
+#Paragraph
+Paragraph(
+'caseSensitive': 1
+'encoding': 'utf8'
+'text': 'bool' 'frags': [P
+araFrag(__tag__='p
+ara', bold=0, fontNa
+me='Helvetica',
+fontSize=9, greek=0,
+italic=0, link=[],
+rise=0, text='bool', te
+xtColor=Color(0,0,0,
+1), us_lines=[])]
+'style': 'bulletText':
+None 'debug': 0 )
+#Paragraph
+Paragraph( 'caseSensitive': 1 'encoding': 'utf8' 'text': 'Human approval
+decision from HITL webhook callback' 'frags':
+[ParaFrag(__tag__='para', bold=0, fontName='Helvetica', fontSize=9,
+greek=0, italic=0, link=[], rise=0, text='Human approval decision from
+HITL webhook callback', textColor=Color(0,0,0,1), us_lines=[])] 'style':
+'bulletText': None 'debug': 0 ) #Paragraph
+Paragraph(
+'caseSensitive': 1
+'encoding': 'utf8'
+'text': 'result'
+'frags': [ParaFrag
+(__tag__='para',
+bold=0, fontNam
+e='Helvetica',
+fontSize=9,
+greek=0, italic=0,
+link=[], rise=0,
+text='result', text
+Color=Color(0,0,
+0,1),
+us_lines=[])]
+'style':
+'bulletText': None
+'debug': 0 )
+#Paragraph
+Paragraph(
+'caseSensitive': 1
+'encoding': 'utf8'
+'text': 'str' 'frags': [Pa
+raFrag(__tag__='par
+a', bold=0, fontName
+='Helvetica',
+fontSize=9, greek=0,
+italic=0, link=[],
+rise=0, text='str', text
+Color=Color(0,0,0,1)
+, us_lines=[])] 'style':
+'bulletText': None
+'debug': 0 )
+#Paragraph
+Paragraph( 'caseSensitive': 1 'encoding': 'utf8' 'text': 'kubectl execution
+output and post-action pod state' 'frags': [ParaFrag(__tag__='para',
+bold=0, fontName='Helvetica', fontSize=9, greek=0, italic=0, link=[],
+rise=0, text='kubectl execution output and post-action pod state',
+textColor=Color(0,0,0,1), us_lines=[])] 'style': 'bulletText': None 'debug':
+0 ) #Paragraph
+
+--- Page 7 ---
+Paragraph(
+'caseSensitive': 1
+'encoding': 'utf8'
+'text': 'audit_log'
+'frags': [ParaFrag
+(__tag__='para',
+bold=0, fontNam
+e='Helvetica',
+fontSize=9,
+greek=0, italic=0,
+link=[], rise=0,
+text='audit_log', t
+extColor=Color(0
+,0,0,1),
+us_lines=[])]
+'style':
+'bulletText': None
+'debug': 0 )
+#Paragraph
+Paragraph(
+'caseSensitive': 1
+'encoding': 'utf8'
+'text': 'list[LogEntry]'
+'frags': [ParaFrag(__
+tag__='para',
+bold=0, fontName='
+Helvetica',
+fontSize=9, greek=0,
+italic=0, link=[],
+rise=0,
+text='list[LogEntry]', t
+extColor=Color(0,0,
+0,1), us_lines=[])]
+'style': 'bulletText':
+None 'debug': 0 )
+#Paragraph
+Paragraph( 'caseSensitive': 1 'encoding': 'utf8' 'text': 'Persistent history
+of all incidents, decisions, and actions' 'frags':
+[ParaFrag(__tag__='para', bold=0, fontName='Helvetica', fontSize=9,
+greek=0, italic=0, link=[], rise=0, text='Persistent history of all incidents,
+decisions, and actions', textColor=Color(0,0,0,1), us_lines=[])] 'style':
+'bulletText': None 'debug': 0 ) #Paragraph
+Anomaly Classification Matrix
+The agent must detect and handle the following anomaly types. Teams that implement only CrashLoopBackOff
+will score in the bottom quartile. The first three are the minimum required for a passing demo.
+Anomaly Type
+Trigger Signal
+ Auto-Action
+ Sev
+CrashLoopBackOff
+restartCount > 3
+Fetch logs → diagnose → auto
+restart pod
+HIGH
+OOMKilled
+lastState.terminated.reason =
+OOMKilled
+Read limits → patch +50%
+memory → restart
+HIGH
+Pending Pod
+pod.status.phase = Pending >
+5 min
+Describe → check node capacity
+→ recommend
+MED
+ImagePullBackOff
+state.waiting.reason =
+ImagePullBackOff
+Extract image → alert human
+MED
+CPU Throttling
+Prometheus: cpu_throttled >
+0.5
+Patch CPU limit upward → verify
+throttle drops
+MED
+Evicted Pod
+pod.status.reason = Evicted
+Check node pressure → delete
+evicted pod
+LOW
+Deployment Stalled
+updatedReplicas != replicas >
+10 min
+Check events → HITL: rollback or
+force rollout
+HIGH
+Node NotReady
+conditions[Ready] = False
+Log metrics → HITL ONLY —
+never auto-drain
+CRITICA
+L
+Hidden Traps — What Will Break Naive Implementations
+
+--- Page 8 ---
+Race Conditions
+Two anomalies fire simultaneously on the same pod — your agent must handle
+concurrent state updates without corrupting ClusterState.
+False Positives
+A pod restarts during a rolling update (expected) vs a CrashLoop (bad). LLM must
+distinguish planned from unplanned restarts.
+RBAC Footgun
+If your MCP tool has cluster-admin, a hallucinated action can delete namespaces.
+Scoping to pod-level delete only is non-trivial to implement correctly.
+Verify Loop
+After restarting a pod, it may take 60+ seconds to become Running. Verify step must poll
+with backoff, not just check once.
+Slack Webhook
+Latency
+HITL approval can take minutes. LangGraph must pause the graph cleanly and resume
+on callback — not spin-wait or timeout prematurely.
+Log Noise
+kubectl logs returns megabytes. Passing the full log to the LLM hits context limits.
+Chunking and summarisation strategy required.
+Required Deliverables
+1
+Live Agent Demo
+Working demo against a real minikube cluster covering at least 3 anomaly
+scenarios: CrashLoopBackOff (auto-fix), OOMKilled (HITL), and Pending Pod
+(explain).
+2
+HITL Slack Flow
+Slack message with Approve / Reject buttons. FastAPI webhook that resumes
+the LangGraph graph. Full flow demonstrated live with a judge clicking Approve.
+3
+Audit Trail
+Persistent JSON audit log showing every agent decision, action taken, and
+plain-English explanation. Must include at least 3 complete incident records.
+4
+RBAC YAML
+ServiceAccount + Role + RoleBinding YAML that limits the agent to pod-level
+operations only. Judges will inspect for cluster-admin absence.
+5
+Architecture
+Presentation
+5-minute presentation covering: problem statement, LangGraph node graph,
+MCP tool design, safety gate logic, and live demo. Q&A; to follow.
+Scoring Rubric — PS 1 (100 Marks)
+ Criterion
+ Marks
+ What Judges Look For
+ 
+Autonomous Remediation
+30
+Agent correctly auto-fixes CrashLoopBackOff, OOMKilled, Evicted
+pods. Speed and accuracy of verify step.
+Safety Gate & HITL
+25
+Correct routing of high-risk actions to HITL. Slack approval flow
+works end-to-end. RBAC enforced. No destructive auto-executions.
+Diagnosis Quality
+20
+Root cause explanation accurate and actionable. Evidence cited
+from actual kubectl output. Plain-English log understandable to a
+non-expert.
+
+--- Page 9 ---
+LangGraph Architecture
+15
+Clean node definitions, proper conditional edges, working
+checkpointer, TypedDict schema. Code quality and graph structure
+reviewed.
+MCP Integration
+10
+Proper MCP server with typed tool definitions. kubectl and Slack
+MCP tools functional. RBAC ServiceAccount correctly scoped.
+TOTAL
+100
+ Bonus (up to 5 marks each): Prometheus MCP for metric-driven detection · Multi-namespace support · Predictive alerting
+before pod crashes · Auto-generated GitHub PR for permanent config fixes.
+Recommended Tech Stack
+LangGraph
+StateGraph orchestration, conditional edges, MemorySaver checkpointer, HITL interrupt
+LangChain
+Tool wrappers, ReAct sub-agent for diagnosis, structured output parsing
+LLM API
+GPT-4o or Claude Sonnet for classifier, planner, and explainer nodes
+kubectl MCP Server
+Python MCP SDK — expose kubectl as typed tools with RBAC ServiceAccount
+Slack MCP
+Block Kit messages with Approve/Reject interactive buttons
+FastAPI
+HITL webhook server that receives Slack callback and resumes LangGraph graph
+Prometheus MCP
+Optional — for CPU throttling and memory pressure anomaly detection
+minikube
+Local Kubernetes cluster for demo — single-node, fast to spin up and reset
+24-Hour Build Timeline
+00–02h
+Setup & scaffold
+minikube up · kubectl MCP skeleton · LangGraph StateGraph with 8 empty
+nodes · deps
+02–05h
+Observe + Detect
+observe_node polling loop · kubectl MCP read-only tools · detect_node LLM
+classifier
+05–09h
+Diagnose + Plan
+diagnose_node sub-agent (logs + describe) · plan_node with
+RemediationPlan schema
+09–13h
+Safety Gate +
+Execute
+safety_router conditional edge · kubectl action tools · execute_node with 30s
+verify · RBAC YAML
+13–17h
+HITL + Slack
+hitl_node with FastAPI webhook · Slack Block Kit message · Approve/Reject
+buttons · audit trail
+17–20h
+Demo scenarios
+crashloop.yaml · oomkill.yaml · pending.yaml · Prometheus MCP · rehearse
+demo flow
+20–22h
+Stress test
+Run all 3 scenarios 3× · fix flaky edges · retry logic · verify HITL end-to-end ·
+freeze code
+22–24h
+Presentation prep
+Architecture slide · 5-minute script · fallback recorded demo · practice judge
+Q&A;
+
+--- Page 10 ---
+Web3 / Blockchain Bonus — 25 Marks (PS 1)
+Teams attempting the Web3 bonus must build a valid Full Stack Stellar blockchain project that integrates
+with their pipeline. The bonus is awarded based on adherence to the repo structure and submission guidelines
+below.
+Submission Link
+Submit your Web3 project at:
+https://www.risein.com/programs/hackathon-project-submission-stellar?referral=JEtvo
+Valid Full Stack Project Requirements
+1. Repository Structure
+A valid Full Stack project repo must contain Frontend, Smart Contract, and Integration logic in a single,
+well-organised repository. The structure should look similar to this:
+AnonymousFeedbackSmartContract/
+    ■■■ contracts/hello-world/
+         ■■■ .gitignore
+         ■■■ Cargo.lock
+         ■■■ Cargo.toml
+         ■■■ README.md
+    ■■■ public/
+    ■■■ src/
+         ■■■ components/
+         ■■■ App.css
+         ■■■ App.js
+         ■■■ index.css
+         ■■■ index.js
+         ■■■ ...
+    ■■■ .gitignore
+    ■■■ README.md
+    ■■■ package.json
+    ■■■ tailwind.config.js
+i.
+The developer has used React.js and Tailwind CSS for the frontend, which can be understood by looking at the
+folder structure. The complete smart contract structure must be present in the same repository.
+ii.
+The frontend codebase may vary depending on the framework the developer chooses, so some differences in
+structure are expected.
+iii.
+What matters most is that the repository is clean and well organised. It should not contain unnecessary files or
+folders, and it must clearly include the frontend, smart contract, and the integration logic.
+2. README File Requirements
+
+--- Page 11 ---
+The README file for every project must include the following sections:
+ Project Title
+ Project Description
+ Project Vision
+ Key Features
+ Deployed Smartcontract Details
+ → Contract ID
+ → Screenshot of the blockexplorer showing the deployed contract details
+ UI Screenshots
+ Demo link of their live app (Optional)
+ Demo video demonstrating the dApp's features (Optional)
+ Project Setup Guide
+ Future Scope
+Note: Devs can definitely use AI but make sure the README file doesn't contain any content which makes it look
+like an AI-generated README.
+3. Integration Logic (Stellar-SDK)
+The final validation step is to confirm that participants have actually written the integration logic for calling the
+deployed smart contract functions from the frontend using Stellar-SDK. Simply deploying a contract without
+frontend integration will not qualify for the bonus.
+4. Reference Repositories
+If you want to see how a valid Full Stack project repo looks like, visit these example repos:
+1. Anonymous Feedback dApp: https://github.com/bhupendra-chouhan/Stellar-Journey-to-Mastery
+2. CratePass: https://github.com/bhupendra-chouhan/CratePass-Soroban
+Scoring Breakdown — Web3 Bonus
+ Criterion
+ Marks
+Valid repo structure (Frontend + Smart Contract + Integration)
+10
+Meaningful use — adds real value to the pipeline
+10
+Quality of demo and explanation
+5
+TOTAL
+25
+
+--- Page 12 ---
+PS 2 · AI/ML Track
+ 
+Autonomous Structural Intelligence System
+Floor Plan Parser · 3D Generator · Material Optimiser
+Track
+AI/ML
+Duration
+36 Hours (continuous)
+Team Size
+2 – 4 members
+Difficulty
+■ ■ ■ Hard — Mandatory core + optional depth
+Core Stack
+OpenCV · Three.js / Open3D · Shapely · LLM API of choice
+Input
+12 hours pre-release: 3 sample floor plan images + starter material database (JSON)
+"Build an AI system that reads a floor plan, builds it in 3D, and tells you exactly what to
+ construct it with — and why."
+ 
+Objective
+Build an AI-powered pipeline that takes a digital floor plan image, reconstructs it as a 3D structural model, and
+recommends optimal construction materials by analysing cost vs. durability/strength tradeoffs — with clear,
+human-readable justification for every decision.
+Test inputs will be clean, digital, orthogonal floor plans similar to the samples provided. Robustness to
+hand-drawn or noisy inputs is not a mandatory requirement.
+Provided Sample Floor Plans
+Three floor plan images are provided as sample inputs. Your pipeline will be evaluated against all three. Plan B
+is the primary evaluation input; Plan C tests non-rectangular boundary handling.
+Plan A — 2 Bedrooms / 1 Bathroom
+(Simple rectangular layout — baseline
+ validation)
+ Plan B — 4 Bedrooms / 3 Bathrooms
+(Multi-room with kitchen, laundry, foyer —
+primary evaluation input)
+Plan C — 3 Bedrooms / 2 Bathrooms
+(L-shaped building outline — stretch input)
+Plan
+Layout
+ Description
+ Purpose
+ 
+--- Page 13 ---
+A
+2 Bedroom / 1
+Bathroom
+Simple rectangular layout
+Baseline — validate your parser works
+B
+4 Bedroom / 3
+Bathroom
+Multi-room with kitchen,
+laundry, foyer
+Primary evaluation input
+C
+3 Bedroom / 2
+Bathroom
+L-shaped building outline
+Stretch — tests non-rectangular
+boundary handling
+Mandatory Pipeline — 5 Stages
+01
+Floor Plan Parsing
+Detect and extract walls (lines/segments), rooms (enclosed regions), and
+openings (doors, windows) from the floor plan image. Extract approximate
+coordinates and dimensions of each element. Recommended: OpenCV
+line detection and contour extraction.
+02
+Geometry
+Reconstruction
+Convert detected elements into a graph (nodes = corners/junctions, edges
+= walls). Classify walls as load-bearing (outer + structural spine) vs.
+partition. Identify spans and room extents. Fallback clause: if CV fails,
+teams may use manually defined coordinates — this will be disclosed and
+the 3D + material steps are still fully evaluated.
+03
+2D → 3D Model
+Generation
+Extrude walls to a standard floor height (assume 3m if not specified). Add
+floor slab representation. Output must be viewable — browser-based
+render (Three.js) or exported 3D file required. Judged on structural
+correctness and completeness, not visual polish.
+04
+Material Analysis &
+Cost–Strength Tradeoff
+For each structural element (load-bearing walls, partition walls, slabs,
+columns): recommend materials from the provided starter database;
+compute a tradeoff score using a weighted cost × strength formula;
+present 2–3 ranked options per element.
+05
+Explainability
+Explain in plain language: why each material was recommended; what the
+cost–strength tradeoff looks like; any structural concerns detected (e.g.,
+large unsupported span). LLM-generated summaries are acceptable and
+encouraged.
+Note: 3D output is judged on structural correctness and completeness — not aesthetics. A box-accurate model with
+all rooms present scores higher than a partially rendered photorealistic output.
+Starter Material Database
+Teams must use this as their base material knowledge source and may extend it.
+Material
+Cost
+Strength
+Durability
+ Best Use
+ 
+AAC Blocks
+Low
+Medium
+High
+Partition walls
+Red Brick
+Medium
+High
+Medium
+Load-bearing walls
+
+--- Page 14 ---
+RCC
+High
+Very High
+Very High
+Columns, slabs
+Steel Frame
+High
+Very High
+Very High
+Long spans (>5m)
+Hollow Concrete Block
+Low–Med
+Medium
+Medium
+Non-structural walls
+Fly Ash Brick
+Low
+Medium–High
+High
+General walling
+Precast Concrete Panel
+Med–High
+High
+Very High
+Structural walls, slabs
+Optional Extensions — No Penalty for Skipping
+ Structural Validation Rules — Detect large unsupported spans, misaligned load paths, and missing column
+positions.
+ Layout Optimisation Engine — Suggest improved wall placement, span reduction strategies, or cost-saving
+material substitutions.
+ Robustness to Noisy Inputs — Handle hand-drawn, skewed, non-90° layouts, overlapping/duplicate lines,
+missing or broken walls.
+ Constraint Solving — Enforce geometric constraints: wall closure, alignment, consistency. Infer missing
+dimensions from context.
+ Real-Time Material Pricing — Integrate a live construction material price API instead of the static database.
+ Multi-Storey Support — Extend the pipeline to handle stacked floor plans with inter-floor structural
+dependencies.
+ Cost Breakdown Report — Generate a line-item material cost estimate for the full structure, exportable as
+PDF.
+Hidden Traps — What Will Break Naive Implementations
+Non-90° Layouts
+Even "clean" floor plans may have slight angular deviations. Snapping coordinates to
+an orthogonal grid without tolerance checks produces impossible geometries.
+Junction Detection
+T-junctions and L-corners look similar in line detection output. Misclassifying them
+creates open room boundaries that break polygon extraction.
+3D Handoff Quality
+If wall detection produces slightly offset coordinates, the 3D model will have gaps or
+floating walls. One bad coordinate cascades into an unusable model.
+Load-Bearing
+Classification
+A rule like "outer walls are load-bearing" is necessary but not sufficient. Central
+structural spines, columns, and beam positions require additional heuristics.
+Material Tradeoff Formula
+A naive formula (cost + strength) weights both equally. Judges will probe whether
+teams thought about why weight ratios differ between structural and non-structural
+elements.
+Explainability Depth
+An LLM that says "Red Brick is recommended because it is good" will score poorly.
+Explanations must cite specific element properties and span measurements.
+Scoring Rubric — PS 2 (100 Marks)
+
+--- Page 15 ---
+Criterion
+ Marks
+ What Judges Look For
+ 
+Floor Plan Parsing
+20
+Wall, room, and opening detection accuracy on provided test
+inputs. Partial CV output is scored — fallback clause disclosed
+if used.
+2D → 3D Model
+25
+Structural correctness and completeness of the 3D model. All
+rooms present and walls correctly positioned. Must be
+viewable.
+Material Analysis & Tradeoff Logic
+25
+Quality of material recommendations, correctness of tradeoff
+scoring formula, and suitability of recommendations per
+element type.
+Explainability
+20
+Clarity and usefulness of plain-language explanations.
+Evidence cited from geometry data. Readable by a non-expert.
+System Integration & Demo
+Quality
+10
+End-to-end pipeline works live. Presentation clarity, handling of
+edge cases, and overall system design.
+TOTAL
+100
+
+--- Page 16 ---
+Web3 / Blockchain Bonus — 25 Marks (PS 2)
+Teams attempting the Web3 bonus must build a valid Full Stack Stellar blockchain project that integrates
+with their pipeline. The bonus is awarded based on adherence to the repo structure and submission guidelines
+below.
+Submission Link
+Submit your Web3 project at:
+https://www.risein.com/programs/hackathon-project-submission-stellar?referral=JEtvo
+Valid Full Stack Project Requirements
+1. Repository Structure
+A valid Full Stack project repo must contain Frontend, Smart Contract, and Integration logic in a single,
+well-organised repository. The structure should look similar to this:
+AnonymousFeedbackSmartContract/
+    ■■■ contracts/hello-world/
+         ■■■ .gitignore
+         ■■■ Cargo.lock
+         ■■■ Cargo.toml
+         ■■■ README.md
+    ■■■ public/
+    ■■■ src/
+         ■■■ components/
+         ■■■ App.css
+         ■■■ App.js
+         ■■■ index.css
+         ■■■ index.js
+         ■■■ ...
+    ■■■ .gitignore
+    ■■■ README.md
+    ■■■ package.json
+    ■■■ tailwind.config.js
+i.
+The developer has used React.js and Tailwind CSS for the frontend, which can be understood by looking at the
+folder structure. The complete smart contract structure must be present in the same repository.
+ii.
+The frontend codebase may vary depending on the framework the developer chooses, so some differences in
+structure are expected.
+iii.
+What matters most is that the repository is clean and well organised. It should not contain unnecessary files or
+folders, and it must clearly include the frontend, smart contract, and the integration logic.
+2. README File Requirements
+
+--- Page 17 ---
+The README file for every project must include the following sections:
+ Project Title
+ Project Description
+ Project Vision
+ Key Features
+ Deployed Smartcontract Details
+ → Contract ID
+ → Screenshot of the blockexplorer showing the deployed contract details
+ UI Screenshots
+ Demo link of their live app (Optional)
+ Demo video demonstrating the dApp's features (Optional)
+ Project Setup Guide
+ Future Scope
+Note: Devs can definitely use AI but make sure the README file doesn't contain any content which makes it look
+like an AI-generated README.
+3. Integration Logic (Stellar-SDK)
+The final validation step is to confirm that participants have actually written the integration logic for calling the
+deployed smart contract functions from the frontend using Stellar-SDK. Simply deploying a contract without
+frontend integration will not qualify for the bonus.
+4. Reference Repositories
+If you want to see how a valid Full Stack project repo looks like, visit these example repos:
+1. Anonymous Feedback dApp: https://github.com/bhupendra-chouhan/Stellar-Journey-to-Mastery
+2. CratePass: https://github.com/bhupendra-chouhan/CratePass-Soroban
+Scoring Breakdown — Web3 Bonus
+ Criterion
+ Marks
+Valid repo structure (Frontend + Smart Contract + Integration)
+10
+Meaningful use — adds real value to the pipeline
+10
+Quality of demo and explanation
+5
+TOTAL
+25
+
+--- Page 18 ---
+Overall Hackathon Judging Criteria
+Applies across both tracks · 100 marks · Independent of PS-specific rubrics
+Each PS has its own detailed technical rubric (100 marks). The overall judging framework below applies across
+both tracks and is used by judges to normalise scores, break ties, and determine awards beyond the technical
+marks.
+ Criterion
+ Marks
+ What Judges Look For
+ 
+Technical Execution
+40
+Core pipeline functional end-to-end. Mandatory stages
+complete. Handles provided test inputs correctly. No critical
+failures during demo.
+Problem-Solving Depth
+20
+Evidence of real engineering decisions — not just stitching APIs
+together. Handling of edge cases, failure modes, and system
+constraints.
+Code & System Design
+15
+Code is readable, modular, and maintainable. Architecture is
+coherent. State management, error handling, and logging are
+present and correct.
+Explainability & Communication
+15
+The system explains its own decisions clearly. Team
+presentation is clear, demo is structured, and judges' questions
+are answered with depth.
+Innovation & Impact
+10
+Does the solution go beyond what was asked? Is the approach
+novel in some dimension — UX, algorithm, integration, or
+framing?
+TOTAL
+100
+Difficulty Arc & Scoring Strategy
+Below 40 marks
+Only the first 1–2 mandatory stages completed. Demo shows basic detection or parsing but no
+end-to-end flow. No explainability. System crashes on demo inputs.
+40–65 marks
+Mandatory pipeline complete but shallow. Works on the easiest test input. Explanations are
+generic. No optional extensions attempted.
+65–80 marks
+Mandatory pipeline solid. Works on 2+ test inputs. Some optional extensions attempted.
+Explanations are specific and evidence-backed.
+80–90 marks
+Full mandatory pipeline plus 2+ meaningful optional extensions. Explanations are excellent.
+System is robust. Demo is clean and well-rehearsed.
+90+ marks
+Exceptional technical depth. Novel approach in at least one dimension. Web3 integration
+meaningful and functional. Evidence of production-grade thinking.
+Evaluation Rules
+
+--- Page 19 ---
+ Teams must demo a working system live — recorded demos are accepted only as backup if technical
+failure occurs during presentation.
+ Web3 bonus marks are awarded only if integration is functional and meaningful — storing a random hash
+with no connection to the pipeline output → 0 marks.
+ Use of any LLM API (OpenAI, Anthropic, Mistral, open-source models) is permitted and not penalised.
+ Teams using the structural PS fallback manual coordinate clause must disclose this during demo —
+dishonest disclosure results in 0 marks for the parsing criterion.
+ For K8sWhisperer: judges will inject a live anomaly during the demo. The team must let the agent respond
+autonomously — no manual kubectl commands during the demo window.
+ Plagiarism or direct use of existing open-source Kubernetes operator code without significant modification
+→ disqualification.
+ All teams submit: source code (GitHub link), README with setup instructions, and architecture diagram
+before the judging session begins.
+The real challenge is not the technology. Any team can stitch together APIs. The
+challenge is building a reasoning system that knows when to act, when to ask, and when
+to stop — and an analysis system that turns raw geometry into genuine insight. That is
+what separates a script from an agent, and a parser from an engineer.
+ 

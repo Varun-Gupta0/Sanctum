@@ -51,6 +51,7 @@ _EDGES = (
     (1, 5),
     (2, 6),
     (3, 7),
+    (3, 7),
 )
 
 
@@ -67,7 +68,7 @@ def cuboid_vertices(
 
 
 def _room_color(index: int, total: int) -> str:
-    """Distinct, evenly spaced hues (golden ratio step avoids clustering)."""
+    """Distinct, evenly spaced hues."""
     if total <= 0:
         total = 1
     h = ((index * 0.618033988749895) + 0.07) % 1.0
@@ -85,9 +86,12 @@ def _edge_line_coords(
     ys: list[float | None] = []
     zs: list[float | None] = []
     for a, b in _EDGES:
-        xs.extend((vx[a], vx[b], None))
-        ys.extend((vy[a], vy[b], None))
-        zs.extend((vz[a], vz[b], None))
+        try:
+            xs.extend((vx[a], vx[b], None))
+            ys.extend((vy[a], vy[b], None))
+            zs.extend((vz[a], vz[b], None))
+        except IndexError:
+            pass
     return xs, ys, zs
 
 
@@ -118,7 +122,7 @@ def _parse_room(room: dict, index: int) -> tuple[str, float, float, float, float
     )
 
 
-def render_rooms(rooms: list, output_html: str | None = None, auto_open: bool = True) -> None:
+def _build_figure(rooms: list):
     fig = go.Figure()
 
     if not rooms:
@@ -144,8 +148,7 @@ def render_rooms(rooms: list, output_html: str | None = None, auto_open: bool = 
                 )
             ],
         )
-        fig.show()
-        return
+        return fig, 0, 0, 0, 0
 
     n = len(rooms)
     lx, ly, lz, labels = [], [], [], []
@@ -235,10 +238,64 @@ def render_rooms(rooms: list, output_html: str | None = None, auto_open: bool = 
         margin=dict(l=0, r=0, t=50, b=0),
         legend=dict(yanchor="top", y=0.98, xanchor="left", x=0.02, bgcolor="rgba(255,255,255,0.7)"),
     )
+    return fig, xmin, xmax, ymin, ymax
 
+
+def render_rooms(rooms: list, output_html: str | None = None, auto_open: bool = True) -> None:
+    fig, _, _, _, _ = _build_figure(rooms)
     out_path = Path(output_html) if output_html else Path(__file__).resolve().parent / "floorplan_3d.html"
     fig.write_html(str(out_path), include_plotlyjs="cdn", auto_open=auto_open)
     print(f"Interactive plot: {out_path}")
+
+
+def get_risk_color(score: int) -> str:
+    if score >= 80: return "rgb(255, 71, 87)"    # Red
+    elif score >= 50: return "rgb(255, 184, 0)"  # Orange
+    elif score >= 30: return "rgb(253, 224, 71)" # Yellow
+    else: return "rgb(0, 217, 165)"              # Green
+
+
+def wall_cuboid_vertices(x1: float, y1: float, x2: float, y2: float, height: float=3.0, thickness: float=0.2):
+    angle = math.atan2(y2 - y1, x2 - x1)
+    dx = - (thickness/2) * math.sin(angle)
+    dy =   (thickness/2) * math.cos(angle)
+    xs = [x1+dx, x1-dx, x2-dx, x2+dx, x1+dx, x1-dx, x2-dx, x2+dx]
+    ys = [y1+dy, y1-dy, y2-dy, y2+dy, y1+dy, y1-dy, y2-dy, y2+dy]
+    zs = [0.0, 0.0, 0.0, 0.0, height, height, height, height]
+    return xs, ys, zs
+
+
+def generate_plotly_json(rooms: list, results: list) -> str:
+    """Generate the Plotly graph JSON mapping rooms and rendering individual risk-colored walls."""
+    # Build base room figure
+    fig, xmin, xmax, ymin, ymax = _build_figure(rooms)
+    
+    # Add walls as solid meshes over the rooms from the results array
+    for item in results:
+        w = item["wall"]
+        if "x1" not in w:
+            continue
+            
+        color = get_risk_color(item.get("risk_score", 0))
+        vx, vy, vz = wall_cuboid_vertices(w["x1"], w["y1"], w["x2"], w["y2"], height=ROOM_HEIGHT)
+        
+        name = w.get("id", "Wall")
+        if w.get("type") == "load_bearing":
+            name += " [Load Bearing]"
+        
+        fig.add_trace(go.Mesh3d(
+            x=vx, y=vy, z=vz,
+            i=_CUBOID_I, j=_CUBOID_J, k=_CUBOID_K,
+            color=color, opacity=1.0, name=name,
+            flatshading=True,
+            lighting=dict(ambient=0.45, diffuse=0.85, specular=0.35),
+            showlegend=True
+        ))
+    
+    fig.update_layout(paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)')
+    fig.update_scenes(xaxis_backgroundcolor='rgba(0,0,0,0)', yaxis_backgroundcolor='rgba(0,0,0,0)', zaxis_backgroundcolor='rgba(0,0,0,0)')
+    
+    return fig.to_json()
 
 
 if __name__ == "__main__":
