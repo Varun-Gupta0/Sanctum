@@ -328,6 +328,8 @@ document.addEventListener('DOMContentLoaded', () => {
                             `;
                         }).join('');
                         
+                        const insight = item.ai_insight || {};
+                        
                         html += `
                             <div class="wall-interaction-item" style="border-left-color: ${riskColor}30;">
                                 <div class="wall-item-header">
@@ -336,6 +338,25 @@ document.addEventListener('DOMContentLoaded', () => {
                                 </div>
                                 <div class="material-options-list">
                                     ${optionsHtml}
+                                </div>
+                                
+                                <div class="ai-insight-box">
+                                    <div class="insight-label">
+                                        <span class="material-symbols-outlined insight-icon">psychology</span>
+                                        AI Structural Reasoning
+                                    </div>
+                                    <p class="insight-text recommendation">${insight.recommendation || 'Deep analysis in progress...'}</p>
+                                    
+                                    <div class="insight-meta">
+                                        <div class="meta-item">
+                                            <span class="meta-label">Predictive Risk:</span>
+                                            <span class="meta-value risk">${insight.future_risks || '-'}</span>
+                                        </div>
+                                        <div class="meta-item">
+                                            <span class="meta-label">Optimal Mitigation:</span>
+                                            <span class="meta-value solution">${insight.solutions || '-'}</span>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         `;
