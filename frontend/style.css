@@ -817,92 +817,150 @@ body {
     overflow-y: auto;
     display: flex;
     flex-direction: column;
-    gap: 16px;
+}
+
+.results-header {
+    padding: 0 0 16px 0;
+    margin-bottom: 24px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.data-summary {
+    font-size: 13px;
+    color: var(--color-outline);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+}
+
+.data-section-title {
+    font-family: var(--font-headline);
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--color-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
+    margin: 0 0 16px 4px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
 }
 
 .room-card {
-    background: var(--bg-surface-container);
-    border: 1px solid var(--color-outline-variant);
+    background: rgba(255, 255, 255, 0.02);
     border-radius: 12px;
     padding: 16px;
+    margin-bottom: 24px;
     display: flex;
     flex-direction: column;
-    gap: 12px;
+    gap: 16px;
+    transition: background 0.3s ease;
+}
+
+.room-card:hover {
+    background: rgba(255, 255, 255, 0.04);
 }
 
 .room-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding-bottom: 12px;
-    border-bottom: 1px solid var(--color-outline-variant);
+}
+
+.room-identity {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.room-indicator {
+    width: 4px;
+    height: 18px;
+    border-radius: 2px;
 }
 
 .room-name {
-    font-size: 14px;
-    font-weight: 700;
+    font-size: 15px;
+    font-weight: 600;
     color: white;
 }
 
 .risk-badge {
     font-size: 10px;
     font-weight: 700;
-    padding: 3px 8px;
-    border-radius: 4px;
     text-transform: uppercase;
+    letter-spacing: 0.05em;
 }
 
-.wall-item {
-    padding-left: 8px;
-    border-left: 2px solid rgba(255, 255, 255, 0.1);
-    margin-bottom: 12px;
+.walls-collection {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
 }
 
-.wall-header {
+.wall-interaction-item {
+    padding-left: 12px;
+    border-left: 1px solid rgba(255, 255, 255, 0.1);
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.wall-item-header {
     display: flex;
     justify-content: space-between;
-    margin-bottom: 12px;
 }
 
-.wall-name {
+.wall-item-name {
     font-size: 12px;
-    font-weight: 600;
-    color: var(--color-primary-container);
+    font-weight: 500;
+    color: var(--color-outline);
 }
 
-.wall-score {
-    font-size: 10px;
+.wall-item-score {
+    font-size: 11px;
     font-weight: 600;
-    color: var(--color-outline);
+}
+
+.material-options-list {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
 }
 
 .material-chip {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 6px 8px;
+    padding: 8px 10px;
     background: rgba(255, 255, 255, 0.03);
-    border-radius: 6px;
-    margin-bottom: 4px;
+    border-radius: 8px;
+    transition: background 0.2s ease;
+}
+
+.chip-main {
+    display: flex;
+    align-items: center;
+    gap: 10px;
 }
 
 .chip-rank {
     font-size: 9px;
-    padding: 1px 4px;
-    border-radius: 3px;
-    margin-right: 4px;
+    font-weight: 700;
+    color: black;
+    padding: 2px 6px;
+    border-radius: 4px;
+    text-transform: uppercase;
 }
 
 .chip-name {
     font-size: 12px;
-    font-weight: 600;
+    font-weight: 500;
 }
 
-.wall-exp {
-    font-size: 12px;
-    color: var(--color-on-surface-variant);
-    line-height: 1.4;
-    margin: 8px 0 0 0;
+.chip-score {
+    font-size: 10px;
+    color: var(--color-outline);
+    font-family: var(--font-mono);
 }
 
 @keyframes spin {

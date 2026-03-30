@@ -105,15 +105,31 @@ def parse_with_opencv(img: np.ndarray) -> dict:
         contours = contours[1:]
 
     for cnt in contours:
-        area = cv2.contourArea(cnt)
         x, y, w, h = cv2.boundingRect(cnt)
-
-        if area < 1000: continue
-        if w < 20 or h < 20: continue
-        if w/h > 5 or h/w > 5: continue
-
+        
+        # Scale to real-world units (meters)
         width = round(w * scale_factor, 1)
         length = round(h * scale_factor, 1)
+        area = width * length
+        aspect_ratio = max(width, length) / max(min(width, length), 0.001)
+
+        # 5. DEBUG MODE
+        print(f"Detected contour: area={area:.2f}, aspect={aspect_ratio:.2f}, dimensions={width}x{length}")
+
+        # 1. MIN AREA FILTER
+        if area < 4:
+            print("  -> Skipped: area < 4 (tiny shape)")
+            continue
+            
+        # 2. ASPECT RATIO CHECK
+        if aspect_ratio > 4:
+            print("  -> Skipped: aspect > 4 (likely window/door)")
+            continue
+            
+        # 3. WALL THICKNESS FILTER
+        if min(width, length) < 1.5:
+            print("  -> Skipped: thickness < 1.5 (structural element)")
+            continue
 
         rooms.append({
             "width": width,
@@ -146,14 +162,17 @@ def parse_with_opencv(img: np.ndarray) -> dict:
 def classify_room(width, length, idx):
     area = width * length
 
-    if area > 25:
+    # 4. Improve ROOM CLASSIFICATION
+    if area > 30:
         return f"Living Room {idx}"
-    elif area < 6:
-        return f"Bathroom {idx}"
-    elif area < 12:
-        return f"Kitchen {idx}"
-    else:
+    elif 12 < area <= 30:
         return f"Bedroom {idx}"
+    elif 6 < area <= 12:
+        return f"Kitchen {idx}"
+    elif 3 < area <= 6:
+        return f"Bathroom {idx}"
+    else:
+        return f"Utility/Storage {idx}"
 
 
 # -------------------------------
