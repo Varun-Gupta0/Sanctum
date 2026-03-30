@@ -446,7 +446,27 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         }
         
-        html += `</div>`; // Close data-section
+        html += `</div>`; // Close data-section (Rooms)
+        
+        // Add Download Section at the bottom
+        html += `
+            <div class="data-section" style="margin-top: 24px; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 24px;">
+                <h3 class="data-section-title">Reports</h3>
+                <div class="blockchain-card" style="flex-direction: row; align-items: center; justify-content: space-between; padding: 20px; background: rgba(108, 92, 231, 0.05); border: 1px dashed rgba(108, 92, 231, 0.2);">
+                    <div style="display: flex; align-items: center; gap: 12px;">
+                        <span class="material-symbols-outlined" style="color: var(--color-primary); font-size: 28px;">description</span>
+                        <div>
+                            <div style="font-size: 14px; font-weight: 600; color: white;">Analysis Export</div>
+                            <div style="font-size: 11px; color: var(--color-outline);">Structural Summary (TXT)</div>
+                        </div>
+                    </div>
+                    <button id="btn-download-report-full" class="icon-btn" style="width: 44px; height: 44px; border-radius: 12px; background: var(--color-primary-container); color: white; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(108, 92, 231, 0.3);">
+                        <span class="material-symbols-outlined" style="font-size: 24px;">download</span>
+                    </button>
+                </div>
+            </div>
+        `;
+
         analysisResults.innerHTML = html;
         
         const btnVerify = document.getElementById('btn-verify-hash');
@@ -510,6 +530,43 @@ document.addEventListener('DOMContentLoaded', () => {
                         btnCopy.innerHTML = originalHtml;
                     }, 2000);
                 }
+            });
+        }
+        
+        const btnDownload = document.getElementById('btn-download-report-full');
+        if (btnDownload) {
+            btnDownload.addEventListener('click', () => {
+                let text = `SANCTUM AI - STRUCTURAL ANALYSIS REPORT\n`;
+                text += `========================================\n`;
+                text += `Project ID: ${result.blockchain ? result.blockchain.project_id : 'N/A'}\n`;
+                text += `Report Hash: ${result.report_hash || 'N/A'}\n`;
+                text += `Status: ${result.blockchain ? result.blockchain.status : 'N/A'}\n`;
+                text += `----------------------------------------\n\n`;
+                
+                if (result.rooms) {
+                    result.rooms.forEach(room => {
+                        const score = (result.room_scores || {})[room.id] || 0;
+                        text += `ZONE: ${room.name}\n`;
+                        text += `Risk Score: ${score}\n`;
+                        
+                        const roomWalls = (result.results || []).filter(item => item.wall.room_id === room.id);
+                        roomWalls.forEach((item, idx) => {
+                            const insight = item.ai_insight || {};
+                            text += `  > Wall ${idx+1}: Recommendation: ${insight.recommendation || 'N/A'}\n`;
+                            text += `    Future Risks: ${insight.future_risks || 'N/A'}\n`;
+                        });
+                        text += `\n`;
+                    });
+                }
+
+                const dataStr = "data:text/plain;charset=utf-8," + encodeURIComponent(text);
+                const downloadAnchorNode = document.createElement('a');
+                downloadAnchorNode.setAttribute("href", dataStr);
+                const timestamp = new Date().toISOString().replace(/[:.]/g, '-').split('T')[0];
+                downloadAnchorNode.setAttribute("download", `sanctum_report_${timestamp}.txt`);
+                document.body.appendChild(downloadAnchorNode);
+                downloadAnchorNode.click();
+                downloadAnchorNode.remove();
             });
         }
     }
